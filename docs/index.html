@@ -1,0 +1,969 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- link rel="stylesheet" href="modal.css" -->
+  <link rel="icon" type="image/png" href="fav.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">    
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css" >
+  <!-- script src= "https://unpkg.com/micromodal/dist/micromodal.min.js"></script -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/8.0.2/bignumber.min.js" integrity="sha512-7UzDjRNKHpQnkh1Wf1l6i/OPINS9P2DDzTwQNX79JxfbInCXGpgI1RPb3ZD+uTP3O5X7Ke4e0+cxt2TxV7n0qQ==" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/easytimer@1.1.1/src/easytimer.min.js"></script>
+   
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+  
+
+  <title>블라인드 여론 조사 베팅 게임</title>
+  <style>
+    body { margin-left:50px; margin-top: 30px; margin-right:50px; }
+    #content { max-width: 1000px; margin: auto; }
+    #storedData { font-size:300%; margin-right:10px; }
+    #newValue { width: 200px; margin-right:10px; text-align:right;}
+	  pre { padding: 20px; box-sizing: border-box; max-height:300px; overflow-y: auto; margin-top: 0px; }
+	  pre { white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap;  
+         white-space: -o-pre-wrap; word-wrap: break-word; }
+	  .comments { list-style-type: none;}
+
+    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: lightgray;
+      opacity: 1; /* Firefox */
+    }
+    li { list-style-type: none;}
+    .topMenu li { display: inline; margin: 0; padding-right: 15px; }
+    #topState { text-align: right; }
+    #accountBal {border-radius: 20px; background: #f0f0f5; padding: 20px; margin-right: 15px; padding-bottom: 0px; }
+    #gameSum { border-radius: 20px; background: #f0f0f5; padding: 15px; padding-bottom: 0px; }
+    #network {float: left;}
+    .ui-widget button { font-size: 0.7em;}
+    .ui-tabs .ui-tabs-nav li { border-top-left-radius: 15px; border-top-right-radius: 15px; }
+    .ui-state-active, .ui-state-active, .ui-state-active {background-color: #4359e8; }
+    .question { font-size: 130%;}
+    .poll { background-color: #eff5fc; padding: 2rem; border-radius: 20px; margin-bottom: 2rem; }
+    .ui-widget.ui-widget-content {border: none; }
+    .pollHead span { padding-right: 0.5rem; }
+    .pollBetCount { display: inline-block; }
+    ul { margin-bottom: 1rem; }
+    .pollChoices { margin-top: 1rem; }
+    #siteName { color: #9b4dca; font-family: system-ui; font-weight: 500; }
+    #subTitle { font-size: 65%; margin-left: 1rem; }
+    input.pollChoice { width: 30%; }
+    input.pollChoiceUrl { max-width: 60%; }
+    img.choiceImg { display: block; margin-top: -0.7rem; max-width: 300px; max-height: 600px; border-radius: 10px;}
+    .pollResult { text-align: right; };
+    td.resultChoice { text-align: left; }
+    #spinner2 { position: fixed; left: 33%; opacity: 0.5; top: 45%; display: none;}
+    .urlImg { float: right;}
+
+  </style>
+</head>
+<body> 
+<div id="content">
+
+  <h2 id="title"><span id="siteName">BlindMinds</span> <span id="subTitle"> 블라인드 여론조사 베팅 게임 </span></h2>
+  <div id="msgAlert" style="display: none;">
+  </div>
+  <p>
+    <button style="display:none;" id="btnConnect" onclick="connectAccount()">이더리움 연결하기</button>
+  </p>
+  <ul id="topState" class="topMenu">
+    <li id="network"><span class="networkName"></span></li>
+    <li>게임 컨트랙: <span class="pollAddr"></span></li>
+    <li>내 어카운트: <span class="accountAddr"></span></li>
+  </ul>  
+  <div class="container" id="cid">
+    <div class="row">
+
+      <div class="column column-58" id="accountBal">
+        <ul class="">
+          <li>ETH 잔고: <span class="ethBalance"></span></li>
+          <li>DKEY 토큰 잔고: <span class="tokenBalance"></span></li>
+          <li>DKEY 토큰 허용액: <span class="tokenAllowed"></span>
+          <a class="button button-outline" href="#modal-tokenAllow" rel="modal:open">허용액 설정하기</a>
+        </ul>
+      </div>
+
+      <div class="column" Id="gameSum">
+        <ul>
+          <li>총 설문수: <span id="pollCount"></span></li>
+          <li>총 베팅수 <span id="totalBetCount"></span></li>
+          <li>총 베팅액 <span id="totalBetAmount"></span></li>
+        </ul>
+  
+      </div>
+  
+    </div>
+  </div>
+
+  <!-- modal-->  
+  <div id="modal-tokenAllow" class="modal">
+    <h4> DKEY 토큰 허용액 설정하기 </h4>
+    <p> 게임에서 DKEY 토큰을 사용하기 위해서는 미리 허용액을 설정해야 합니다. 
+        허용액을 설정하더라도 실제 토큰을 전송하는 것은 아니며, 게임 내에서 베팅시 바로 사용할 수 있도록 허용하는 것입니다.
+    </p>
+    <ul>
+      <li style="width:350px;"><b>현재 DKEY 잔고:</b> <span class="tokenBalance" style="float:right;"></span></li>
+      <li style="width:350px;"><b>현재 DKEY 허용:</b> <span class="tokenAllowed" style="float:right;"></span></li>
+      <li><b> DKEY 허용액 설정:</b>
+          <input type="text" id="newTokenAllowAmt" value="0", style="width:150px; text-align: right;">
+          <button class="button" onclick="return setTokenAllow()">설정하기</button>
+      </li>
+    </ul>
+    <div id="setTokenAllowTx"></div>
+    <!-- a href="#" rel="modal:close">Close</a -->
+  </div>
+  <!--end modals-->
+  <!-- button onclick="toggleCreatePoll()">새 여론조사 만들기</button -->  
+
+  <p></p>
+  <div id="tabs">
+    <ul>
+      <li><a href="#tabs-1">진행 중인 설문</a></li>
+      <li onclick="getPastPolls()"><a href="#tabs-2">끝난 설문</a></li>
+      <li><a href="#tabs-3">새 설문 만들기</a></li>
+      <li><a href="#tabs-4">내 기록</a></li>
+      <li><a href="#tabs-5">DKEY 관리</a></li>
+      <li><a href="#tabs-6">Q&A</a></li>
+    </ul>
+    <div id="tabs-1" class="tab">
+      <div id="activePolls">
+      </div>
+    </div>
+    <div onclick="getPastPolls()" id="tabs-2" class="tab">
+      <div id="pastPolls">
+      </div>
+    </div>
+    <div id="tabs-3" class="tab">
+      <div id="createPoll" style="width: 750px; background-color: #f7f7f7; padding: 20px;">
+        <form id="formCreatePoll">
+          <fieldset>
+            <label for="pollMode">게임 방식</label>
+            <select id="pollMode" onchange="checkChoiceCount()">
+              <option value="0">Low - 가장 적은 베팅액을 받은 선택지가 이김</option>
+              <option value="1">High - 가장 많은 베팅액을 받은 선택지가 이김</option>
+              <option value="2">HighLow - 가장 많거나 가장 적은 베팅액을 받은 선택지가 이김 </option>
+            </select>
+    
+            <label for="pollQuestion">질문</label>
+            <textarea placeholder="조사하고 싶은 질문" id="pollQuestion"></textarea>
+    
+            <label >선택지</label>
+            <div><input type="text" placeholder="답변1" name="choice" class="pollChoice" style="margin-right: 4px;"><input type="text" placeholder="답변1 이미지 URL(옵션)" name="choiceUrl" class="pollChoiceUrl"></div>
+            <div><input type="text" placeholder="답변2" name="choice" class="pollChoice" style="margin-right: 4px;"><input type="text" placeholder="답변2 이미지 URL(옵션)" name="choiceUrl" class="pollChoiceUrl"></div>
+            <button id="btnAddChoice" class="button button-outline" onclick="addChoice()">선택지 추가</button>
+            <button id="btnRemoveChoice" class="button button-outline" onclick="removeChoice()">선택지 삭제</button>
+            <button id="btnRemoveChoice" class="button button-outline" onclick="checkImgUrl()">이미지 로딩테스트</button>
+            <p id="pollStartTime" style="display: none;">
+            <label for="startTime">시작 시간</label>
+            <input type="radio" id="startTimeNow" name="startTime" value="0" checked>
+            지금 시작
+            <input type="radio" id="startTimeLater" name="startTime" value="1" style="margin-left: 20px;">
+            <input type="text" id="startTimeLaterHours" value="1" style="width: 40px; text-align: right;">
+            시간 후 시작 (최대 24시간) 
+            </p>
+            <p></p>
+            <label for="startTime">오픈 기간</label>        
+            <input type="text" id="durationHours" value="24" style="width: 60px; text-align: right;"> 시간 (최대 168 시간)
+            <p></p>
+            <!-- button class="button button-outline" onclick="toggleCreatePoll()">취소 하기</button --> 
+            <button class="button button-outline" onclick="resetCreatePoll()">새로 고치기</button> 
+            <button id="btnInsertChoice" class="button" onclick="sendPoll()">등록 하기</button>  
+            <div id="createPollTx"></div>             
+          </fieldset>
+        </form>
+      </div>
+
+    
+    </div>
+    <div id="tabs-4">
+      <h4>내 기록</h4>
+    </div>
+    <div id="tabs-5">
+      <h4>DKEY 지갑</h4>
+    </div>
+    <div id="tabs-6">
+          
+    </div>
+
+  </div>
+  <img id="spinner2" src="loading.gif">
+
+  <script>
+    $( function() {
+      $( "#tabs" ).tabs({ active: 0 });
+    } );
+  </script>
+  <div id="footer">
+  <p></p>
+  <p style="text-align: center;">by Atomrigs Lab © 2020-2021 </p>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.2.11/dist/web3.min.js"></script>
+  <!-- script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script -->
+  <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
+    
+  <script>
+    var BN = BigNumber;
+    var pollAbi
+    if (location.hostname == "127.0.0.1") {
+      pollAbi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"},{"indexed":true,"internalType":"address","name":"bettor","type":"address"},{"indexed":false,"internalType":"uint256","name":"index","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint32","name":"totalBetCount","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"totalBetAmount","type":"uint32"}],"name":"BetCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"},{"indexed":true,"internalType":"address","name":"creator","type":"address"},{"indexed":false,"internalType":"uint32","name":"startTime","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"duration","type":"uint32"},{"indexed":false,"internalType":"uint8","name":"mode","type":"uint8"},{"indexed":false,"internalType":"string","name":"question","type":"string"}],"name":"PollCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"},{"indexed":true,"internalType":"address","name":"bettor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint8","name":"payType","type":"uint8"}],"name":"PollPaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"}],"name":"PollRevealed","type":"event"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"bets","outputs":[{"internalType":"uint8","name":"choiceDecoded","type":"uint8"},{"internalType":"address","name":"bettor","type":"address"},{"internalType":"uint32","name":"betAmount","type":"uint32"},{"internalType":"uint32","name":"paidAmount","type":"uint32"},{"internalType":"bytes32","name":"choiceHash","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"}],"name":"blockByCounter","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_startTime","type":"uint32"},{"internalType":"uint32","name":"_duration","type":"uint32"},{"internalType":"string","name":"_question","type":"string"},{"internalType":"string[]","name":"_choices","type":"string[]"},{"internalType":"string[]","name":"_choiceUrls","type":"string[]"},{"internalType":"uint8","name":"_mode","type":"uint8"}],"name":"createPoll","outputs":[{"internalType":"uint256","name":"pollId","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"deployedBlock","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"gameInfo","outputs":[{"internalType":"uint32","name":"totalPollCount","type":"uint32"},{"internalType":"uint32","name":"totalBetCount","type":"uint32"},{"internalType":"uint32","name":"totalBetAmount","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"gameRule","outputs":[{"internalType":"uint8","name":"operatorCommission","type":"uint8"},{"internalType":"uint8","name":"creatorCommission","type":"uint8"},{"internalType":"uint8","name":"maxChoiceCount","type":"uint8"},{"internalType":"uint32","name":"maxBetCount","type":"uint32"},{"internalType":"uint32","name":"minBetAmount","type":"uint32"},{"internalType":"uint32","name":"maxBetAmount","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getBets","outputs":[{"components":[{"internalType":"uint8","name":"choiceDecoded","type":"uint8"},{"internalType":"address","name":"bettor","type":"address"},{"internalType":"uint32","name":"betAmount","type":"uint32"},{"internalType":"uint32","name":"paidAmount","type":"uint32"},{"internalType":"bytes32","name":"choiceHash","type":"bytes32"}],"internalType":"struct BlindPollBet.Bet[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"_choice","type":"uint8"},{"internalType":"address","name":"_addr","type":"address"},{"internalType":"bytes32","name":"_secreteSalt","type":"bytes32"}],"name":"getHash","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"pure","type":"function"},{"inputs":[],"name":"getPollCount","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getPollResult","outputs":[{"internalType":"uint32[]","name":"","type":"uint32[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getStatus","outputs":[{"internalType":"enum BlindPollBet.Status","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getWiningChoices","outputs":[{"internalType":"uint8[]","name":"","type":"uint8[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"isActive","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"isFinished","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"isPaid","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"},{"internalType":"bytes32","name":"_secreteSalt","type":"bytes32"}],"name":"payPoll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"},{"internalType":"bytes32","name":"_choiceHash","type":"bytes32"},{"internalType":"uint32","name":"_betAmount","type":"uint32"}],"name":"pollBet","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"pollDetails","outputs":[{"internalType":"bool","name":"isPaid","type":"bool"},{"internalType":"bool","name":"isTerminated","type":"bool"},{"internalType":"uint32","name":"betCount","type":"uint32"},{"internalType":"uint32","name":"totalAmount","type":"uint32"},{"internalType":"uint32","name":"bonusAmount","type":"uint32"},{"internalType":"uint32","name":"operatorAmount","type":"uint32"},{"internalType":"uint32","name":"creatorAmount","type":"uint32"},{"internalType":"bytes32","name":"secretSalt","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"uint8","name":"","type":"uint8"}],"name":"pollResults","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"polls","outputs":[{"internalType":"uint8","name":"choiceCount","type":"uint8"},{"internalType":"uint8","name":"mode","type":"uint8"},{"internalType":"address","name":"creator","type":"address"},{"internalType":"uint32","name":"startTime","type":"uint32"},{"internalType":"uint32","name":"duration","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_val","type":"uint32"}],"name":"setMaxBetAmount","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint16","name":"_val","type":"uint16"}],"name":"setMaxBetCount","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_val","type":"uint32"}],"name":"setMinBetAmount","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_val","type":"bool"}],"name":"setNewPollAllow","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"terminatePoll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"tokenAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_tokenAddr","type":"address"}],"name":"updateToken","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"uint8","name":"","type":"uint8"}],"name":"winningChoices","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_toAddr","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"withdrawTo","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}];
+    } else {
+      pollAbi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"},{"indexed":true,"internalType":"address","name":"bettor","type":"address"},{"indexed":false,"internalType":"uint256","name":"index","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint32","name":"totalBetCount","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"totalBetAmount","type":"uint32"}],"name":"BetCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"},{"indexed":true,"internalType":"address","name":"creator","type":"address"},{"indexed":false,"internalType":"uint32","name":"startTime","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"duration","type":"uint32"},{"indexed":false,"internalType":"uint8","name":"mode","type":"uint8"},{"indexed":false,"internalType":"string","name":"question","type":"string"}],"name":"PollCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"},{"indexed":true,"internalType":"address","name":"bettor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint8","name":"payType","type":"uint8"}],"name":"PollPaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"pollId","type":"uint32"}],"name":"PollRevealed","type":"event"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"bets","outputs":[{"internalType":"uint8","name":"choiceDecoded","type":"uint8"},{"internalType":"address","name":"bettor","type":"address"},{"internalType":"uint32","name":"betAmount","type":"uint32"},{"internalType":"uint32","name":"paidAmount","type":"uint32"},{"internalType":"bytes32","name":"choiceHash","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"}],"name":"blockByCounter","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_startTime","type":"uint32"},{"internalType":"uint32","name":"_duration","type":"uint32"},{"internalType":"string","name":"_question","type":"string"},{"internalType":"string[]","name":"_choices","type":"string[]"},{"internalType":"string[]","name":"_choiceUrls","type":"string[]"},{"internalType":"uint8","name":"_mode","type":"uint8"}],"name":"createPoll","outputs":[{"internalType":"uint256","name":"pollId","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"deployedBlock","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"gameInfo","outputs":[{"internalType":"uint32","name":"totalPollCount","type":"uint32"},{"internalType":"uint32","name":"totalBetCount","type":"uint32"},{"internalType":"uint32","name":"totalBetAmount","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"gameRule","outputs":[{"internalType":"uint8","name":"operatorCommission","type":"uint8"},{"internalType":"uint8","name":"creatorCommission","type":"uint8"},{"internalType":"uint8","name":"maxChoiceCount","type":"uint8"},{"internalType":"uint32","name":"maxBetCount","type":"uint32"},{"internalType":"uint32","name":"minBetAmount","type":"uint32"},{"internalType":"uint32","name":"maxBetAmount","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getBets","outputs":[{"components":[{"internalType":"uint8","name":"choiceDecoded","type":"uint8"},{"internalType":"address","name":"bettor","type":"address"},{"internalType":"uint32","name":"betAmount","type":"uint32"},{"internalType":"uint32","name":"paidAmount","type":"uint32"},{"internalType":"bytes32","name":"choiceHash","type":"bytes32"}],"internalType":"struct BlindPollBet.Bet[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"_choice","type":"uint8"},{"internalType":"address","name":"_addr","type":"address"},{"internalType":"bytes32","name":"_secreteSalt","type":"bytes32"}],"name":"getHash","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"pure","type":"function"},{"inputs":[],"name":"getPollCount","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getPollResult","outputs":[{"internalType":"uint32[]","name":"","type":"uint32[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getStatus","outputs":[{"internalType":"enum BlindPollBet.Status","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"getWiningChoices","outputs":[{"internalType":"uint8[]","name":"","type":"uint8[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"isActive","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"isFinished","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"isPaid","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"},{"internalType":"bytes32","name":"_secreteSalt","type":"bytes32"}],"name":"payPoll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"},{"internalType":"bytes32","name":"_choiceHash","type":"bytes32"},{"internalType":"uint32","name":"_betAmount","type":"uint32"}],"name":"pollBet","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"pollDetails","outputs":[{"internalType":"bool","name":"isPaid","type":"bool"},{"internalType":"bool","name":"isTerminated","type":"bool"},{"internalType":"uint32","name":"betCount","type":"uint32"},{"internalType":"uint32","name":"totalAmount","type":"uint32"},{"internalType":"uint32","name":"bonusAmount","type":"uint32"},{"internalType":"uint32","name":"operatorAmount","type":"uint32"},{"internalType":"uint32","name":"creatorAmount","type":"uint32"},{"internalType":"bytes32","name":"secretSalt","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"uint8","name":"","type":"uint8"}],"name":"pollResults","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"polls","outputs":[{"internalType":"uint8","name":"choiceCount","type":"uint8"},{"internalType":"uint8","name":"mode","type":"uint8"},{"internalType":"address","name":"creator","type":"address"},{"internalType":"uint32","name":"startTime","type":"uint32"},{"internalType":"uint32","name":"duration","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_val","type":"uint32"}],"name":"setMaxBetAmount","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint16","name":"_val","type":"uint16"}],"name":"setMaxBetCount","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_val","type":"uint32"}],"name":"setMinBetAmount","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_val","type":"bool"}],"name":"setNewPollAllow","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_pollId","type":"uint32"}],"name":"terminatePoll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"tokenAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_tokenAddr","type":"address"}],"name":"updateToken","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"uint8","name":"","type":"uint8"}],"name":"winningChoices","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_toAddr","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"withdrawTo","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}];
+    }
+    var tokenAbi = [{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"constant":true,"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}];
+    var pollAddr;
+    var tokenAddr;
+    var pollContract;
+    var tokenContract;
+    var tokenAllowed;
+    var myAddr;
+    var chainId = 42; //Goerli testnet
+    var decDigits = 18; //token decimal digit
+    var networkList = {
+      1: "메인넷",
+      3: "Ropsten 테스트넷",
+      4: "Rinkeby 테스트넷",
+      5: "Goerli 테스트넷",
+      42: "Kovan 테스트넷",
+      1337: "Gnache 로컬넷"
+    };
+    var pollHashes = [];
+
+    window.addEventListener("load", function() {
+
+      if (typeof window.ethereum !== "undefined") {
+        window.web3 = new Web3(window.ethereum);
+      } else if (typeof web3 !== "undefined") {
+        window.web3 = new Web3(web3.currentProvider);
+      } else {
+        window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      }
+      if (typeof window.web3 !== "undefined") {
+        startApp();
+      } else {
+        alert("You need to install dapp browser first to use this site!")
+      }
+    });
+
+    async function startApp() {
+      try {
+        var currentChainId = parseInt(await ethereum.request({method: "eth_chainId"}));
+        $(".networkName").html(networkList[currentChainId]);
+        if (currentChainId != chainId) {
+          var wrongChainMsg = "이 게임은 오직 " + networkList[chainId] + "에서만 작동합니다.<br> Dapp 브라우저의 네트워크를 바꾸어 주세요.";
+          showMsg(wrongChainMsg, true);
+          watchChainAccount();
+          return
+        }
+        getAccount();
+      } catch(err) {console.log(err);}
+    }
+
+    function toFixed(weiVal, digit=4) {
+      return BN(weiVal).div(BN(10**decDigits)).toFormat(digit);
+    }
+
+    async function getAccount() {
+      try {
+        var accounts = await ethereum.request({method: "eth_accounts"});
+        if (accounts.length > 0) {
+          myAddr = web3.utils.toChecksumAddress(accounts[0]);
+          $(".accountAddr").html(getLink(myAddr));
+          getContracts();
+        } else {
+          getElem("btnConnect").style.display = "block";   
+          console.log("No ethereum account is available!")
+        }
+        web3.currentProvider.on("accountsChanged", (accounts) => {
+          startApp();
+          console.log(accounts);
+        });
+
+        web3.currentProvider.on("chainChanged", (chainId) => {
+          startApp();
+        });
+
+      } catch(err) {
+        console.log(err);}
+    }
+
+    async function getContracts() {
+      try {
+        if (chainId==1) {
+          pollAddr = ""; 
+          tokenAddr = "";
+        }
+        else if (chainId==5) { 
+          pollAddr = "0x39C78E57562ad1D999758aFe6Bb16590bE8D578B";
+          tokenAddr = "0x155d2A49BB97e6b2aFbD50Bba93191eC9DdE5613";
+        }
+        else if (chainId==42) { 
+          if (location.hostname === '127.0.0.1') pollAddr = "0x5409722AD17d5BD773CE4bE9144646EcDDAc6844"; //test
+          else pollAddr = "0x90873aD9213CDCa286707C996646B7CbC454A714"; 
+          tokenAddr = "0x9dBd912c7b31E70ADc1E9808f4C818B275945423";
+        }
+
+        else {
+          console.log("not supported chain " + chainId);
+          return;
+        }
+
+        pollContract = new web3.eth.Contract(pollAbi, pollAddr);
+        tokenContract = new web3.eth.Contract(tokenAbi, tokenAddr);
+
+        $(".pollAddr").html(getLink(pollAddr));
+        await updateAllbalances();
+        await updateSummary();
+        await getPolls();
+        await getNewBets();
+        watchChainAccount();
+      } catch(err) {console.log(err);}
+    }
+
+    function watchChainAccount() {
+      web3.currentProvider.on("accountsChanged", (accounts) => {
+        startApp();
+        showMsg("<p>어카운트가 변경되었습니다!</p><button onclick='location.reload()'>다시 로딩하기</button>");
+      });
+      web3.currentProvider.on("chainChanged", (chainId) => {
+        startApp();
+        showMsg("<p>네트워크(체인)가 변경되었습니다!</p><button onclick='location.reload()'>다시 로딩하기</button>");
+      });
+    }
+
+
+
+    function connectAccount() {
+      ethereum
+        .request({method: "eth_requestAccounts"})
+        .then((accounts) => {
+          myAddr = accounts[0];
+          $("#accountAddr").html(getLink(myAddr));
+          $("#btnConnect").css("display", "none");
+          startApp();
+        })
+        .catch((err) => {
+          if (err.code === 4001) {
+            // EIP-1193 userRejectedRequest error
+            // If this happens, the user rejected the connection request.
+            console.log("Please connect to Your wallet!");
+          } else {
+            console.error(err);
+          }
+        });
+    }
+
+    async function setTokenAllow() {
+      var value = BN($("#newTokenAllowAmt").val()).multipliedBy(BN(10**decDigits)).toString(10);
+      var gas = await tokenContract.methods.approve(pollAddr, value).estimateGas({from: myAddr});
+      tokenContract.methods.approve(pollAddr, value).send({from: myAddr, gas: gas})
+      .on("transactionHash", (txid) => {
+        $("#setTokenAllowTx").html('트랜잭션 정보 txid: ' + getLink(txid) + '<span id="pending" style="color:red;"><img src="spin.gif">블록체인 컨펌 대기중...</span>');    
+      })
+      .once("receipt", (receipt) => {
+        $("#pending").html("<br>(기록된 블록: " + receipt.blockNumber + ")");
+        $("#pending").css("color", "green");
+        $("#newTokenAllowAmt").val(0);
+        updateAllbalances();        
+      })
+      .on('error', (error) => {
+        $('#pending').html('(트랜잭션 실행 실패!)');
+        $('#pending').css('color', 'red');
+      })
+    }
+
+
+    $("#formCreatePoll").submit(function(e){
+        return false;
+    });  
+
+    function showMsg(msg, hideClose) {
+      $("#msgAlert").html(msg);
+      if (hideClose) {
+        $("#msgAlert").modal({escapeClose: false, clickClose: false, showClose: false});    
+      } else {
+        $("#msgAlert").modal();  
+      }
+      
+    }
+
+    function toggleCreatePoll() {
+      $("#createPoll").toggle();
+      
+    }
+    function addChoice() {
+      var choiceCount = $("input[name='choice']").length;
+      if(choiceCount == 10) {
+        alert("선택지는 최대 10개까지 허용됩니다.");
+        return;
+      }
+      
+      $(`<div class="addedChoice"><input type="text" placeholder="답변${choiceCount+1}" name="choice" class="pollChoice">
+        <input type="text" placeholder="답변${choiceCount+1} 이미지 URL(옵션)" name="choiceUrl" class="pollChoiceUrl"></div>`).insertBefore("#btnAddChoice");
+    }
+
+    function removeChoice() {
+      if ($("#pollMode").val() == 2 && $(".pollChoice").length == 3) {
+          alert("HigLow 게임모드에서는 최소한 3개의 선택지가 있어야 합니다.");
+      } else {
+        $(".addedChoice").last().remove();
+      }
+    }
+
+    function resetCreatePoll() {
+      $("#formCreatPoll").trigger('reset')    
+      $(".addedChoice").remove();
+    }
+
+    function checkChoiceCount() {
+      if ($("#pollMode").val() == 2){
+        if ($(".pollChoice").length < 3) {
+          addChoice();
+        }
+      }
+    }
+
+    async function sendPoll() {
+      var question = $("#pollQuestion").val();
+      var mode = $("#pollMode").val();
+      var choices = [];
+      var choiceUrls = [];
+      var start = 0;
+      var startTimeLaterHours = $("#startTimeLaterHours").val();
+      var durationHours = $("#durationHours").val();
+      var duration = durationHours*60*60;
+
+      
+      $("input[name='choice']").each(function(index) {
+        var val = $(this).val();
+        if (val) choices.push($(this).val());
+      })
+
+      $("input[name='choiceUrl']").each(function(index) {
+        var val = $(this).val();
+        choiceUrls.push($(this).val());
+      })
+      
+      if ($("input[name='startTime']:checked").val() == "1") {
+        start = startTimeLaterHours*60*60;
+      }
+      var errorMsg = "";
+      if (!question) errorMsg += "<li>질문내용이 없습니다.</li>";
+      if (mode=="2" && choices.length < 3) {errorMsg += "<li>HighLow 게임모드에서는 최소한 3개 이상의 선택지 내용이 필요합니다.</li>";}
+      else if (choices.length < 2) {errorMsg += "<li>최소한 2개 이상의 선택지 내용이 필요합니다.</li>";}
+      if (choices.length != choiceUrls.length) {errorMsg += "중간에 비어있는 답변이 있습니다.";}
+      if (startTimeLaterHours > 24) {errorMsg += "<li>시작 시간은 24시간 이내로만 설정할 수 있습니다.</li>";}
+      if (durationHours > 168) {errorMsg += "<li>오픈 기간은 최대 168시간까지만 가능합니다.</li>";}
+      if (errorMsg) {
+        showMsg("<h5>새 여론조사 작성오류:</h5>" + errorMsg);
+        return false;
+      }
+      var gas = await pollContract.methods.createPoll(start, duration, question, choices, choiceUrls, mode).estimateGas({from: myAddr});
+      pollContract.methods.createPoll(start, duration, question, choices, choiceUrls, mode).send({from: myAddr, gas: gas})
+      .on('transactionHash', (txid) => {
+        $("#createPollTx").html(`트랜잭션 정보 txid: ${getLink(txid)} <span id="pending-pollTx" style="color:red;"><img src="spin.gif">블록체인 컨펌 대기중...</span>`);    
+      })
+      .once('receipt', (receipt) => {
+        $('#pending-pollTx').html('<br>(기록된 블록: ' + receipt.blockNumber + ')');
+        $('#pending-pollTx').css('color', 'green');
+        updateAllbalances();
+        updateSummary();
+      })
+      .on('error', (error) => {
+        $('#pending-pollTx').html('(트랜잭션 실행 실패)');
+        $('#pending-pollTx').css('color', 'red');
+      })
+    }
+
+    /* helper function */
+    function getElem(elemId) {
+      return document.getElementById(elemId);
+    }
+
+    function getLink(addr) {
+      if (chainId == 1) {explorer = "https://etherscan.io";}
+      else if(chainId == 3) {explorer = "https://ropsten.etherscan.io";}
+      else if(chainId == 4) {explorer = "https://rinkeby.etherscan.io";}
+      else if(chainId == 5) {explorer = "https://goerli.etherscan.io";}
+      else if (chainId == 42) {explorer = "https://kovan.etherscan.io";}
+      else {
+        explorer = "";
+        console.log("unsupported chainid " + chainId);
+      }
+      var shortAddr = addr.substring(0, 6) + "...." + addr.substring(addr.length -4);        
+
+      if (addr.length == 42) {
+        return '<a target="_blank" style="text-decoration: underline;" href="' + explorer + '/address/' + addr + '">' + shortAddr +'</a>';
+      } else {
+        return '<a target="_blank" style="text-decoration: underline;" href="' + explorer + '/tx/' + addr + '">' + shortAddr +'</a>'; 
+      }
+    }
+
+    function convertTimestamp(unix_timestamp) {
+      return (new Date(unix_timestamp*1000)).toLocaleString();
+    }
+
+    async function updateAllbalances() {
+      var weiEthBal = await web3.eth.getBalance(myAddr);
+      $(".ethBalance").html(toFixed(weiEthBal) + ' ETH').valAnimate();
+      var rawTokenAmt = await tokenContract.methods.balanceOf(myAddr).call();
+      $(".tokenBalance").html(toFixed(rawTokenAmt, 2) + ' DKEY').valAnimate();        
+      var rawtokenAllowed = await tokenContract.methods.allowance(myAddr, pollAddr).call();
+      tokenAllowed = toFixed(rawtokenAllowed, 2)
+      $(".tokenAllowed").html(tokenAllowed + ' DKEY').valAnimate();
+      tokenAllowed = tokenAllowed.replace(',', '')                
+    }
+
+    async function updateSummary() {
+      var gameInfo = await pollContract.methods.gameInfo().call()
+      $("#pollCount").html(gameInfo.totalPollCount)
+      $("#totalBetCount").html(gameInfo.totalBetCount)
+      $("#totalBetAmount").html(gameInfo.totalBetAmount + ' DKEY')
+    }
+
+    async function getPolls() {
+      var startingBlock = await pollContract.methods.deployedBlock().call();
+      $("#spinner2").toggle();
+      pollContract.events.PollCreated({fromBlock: startingBlock})
+      .on("data", async function(r) { 
+        let active = await pollParser(r) 
+        if (active) {
+          activateTimer('timer-'+active.pollId, active.timeLeft, endPoll);        
+        }
+        if ($("#spinner2").css("display") === "block") $("#spinner2").css("display", "none");
+      })
+      .on("error", function(error, receipt){console.log(error); $("#spinner2").toggle();});
+      if ($("#spinner2").css("display") === "block") $("#spinner2").css("display", "none");
+    }
+
+    var pastPolls = [];
+    var incomingPolls = [];
+    
+    async function pollParser(r){
+      var txid = r.transactionHash;
+      if (pollHashes.includes(txid)) { return }
+      pollHashes.push(txid);
+
+      var now = parseInt(Date.now()/1000);
+      var start = parseInt(r.returnValues.startTime);
+      var end = start + parseInt(r.returnValues.duration);
+      var pollId = r.returnValues.pollId;
+      var question = r.returnValues.question;
+      var timeLeft = end - now;
+      
+      if (start <= now && end > now) { //active polls accepting new bets
+        var pollDetail = await pollContract.methods.pollDetails(pollId).call();
+        if (!pollDetail.isTerminated) {
+          var pollTx = await web3.eth.getTransaction(txid);
+          var pollContent = inputDecoder.decode(pollAbi, pollTx.input);
+          var poll = await pollContract.methods.polls(pollId).call();
+          var pollDiv = makePoll(pollId, poll, pollDetail, pollContent);
+          $("#activePolls").prepend(pollDiv);
+          return { pollId, timeLeft };
+        } else {
+          pastPolls.push({ pollId, start, end, question, txid });
+        }
+      } else if (end <= now) { //finishied polls
+        pastPolls.push({ pollId, end, start, question , txid });
+        
+      } else { //comming pools
+        incomingPolls.push({ pollId, end, start, question, txid });
+      }
+    }
+
+    function makePoll(pollId, poll, pollDetail, pollContent) {
+      var pollChoices = pollContent._choices;
+      var imgs = pollContent._choiceUrls;
+      var pollD = $(`<div id="poll-${pollId}" class="poll"></div>`);
+      var headDiv = $(`<div class="pollHead"></div>`);
+      var choicesDiv = $(`<div class="pollChoices"></div>`);
+      var betDiv = $(`<div class="pollBet"></div>`);
+
+      var pollMode;
+      if (poll.mode == 0) { pollMode = "Low"; }
+      else if (poll.mode == 1) { pollMode = "High"; }
+      else { pollMode = "HighLow"; }
+      var endTime = parseInt(poll.startTime) + parseInt(poll.duration);
+      headDiv.append($(`<span class="pollId"><span class="pollKey">설문번호: </span><span>${pollId}</span></span>`));
+      headDiv.append($(`<span class="pollMode"><span class="pollKey">게임모드: </span><span>${pollMode}</span></span>`));
+      headDiv.append($(`<span class="pollEndTime"><span class="pollKey">종료시간: </span><span>${convertTimestamp(endTime)}</span></span>`));
+      headDiv.append($(`<span class="pollTimeLeft"><span class="pollKey">남은시간: </span><span id="timer-${pollId}"></span></span>`));
+      headDiv.append($(`<br>`))
+      headDiv.append($(`<span class="pollBetCount"><span class="pollKey">베팅횟수: </span><span id="pollBetCount-${pollId}">${pollDetail.betCount}</span></span>`));
+      headDiv.append($(`<span class="pollBetAmount"><span class="pollKey">총베팅액: </span><span id="pollBetAmount-${pollId}">${pollDetail.totalAmount}</span>DKEY</span>`));
+      headDiv.append($(`<span class="pollBetAmount"><span class="pollKey">(보너스액: </span><span id="pollBonusAmount-${pollId}">${pollDetail.bonusAmount}</span> DKEY)</span>`));
+      headDiv.append($(`<div class="question" style="margin-top: 1em;">${pollContent._question}</div>`));
+      pollD.append(headDiv);
+      let choicesHtml = `<div class="container">`;
+      for (let i=0; i < pollContent._choices.length; i++) {
+        if (i % 2 === 0) { choicesHtml += `<div class="row">`; }
+        choicesHtml += `<div class="column" onclick="choiceClick(this)"><input type="radio" name="choices-${pollId}" value="${i+1}"> ${i+1}. ${pollChoices[i]}
+                        <img class="choiceImg" src="${imgs[i]}"></div>`;
+        if (i % 2 === 1) { choicesHtml += `</div><br>`; }
+      }
+      if (pollContent._choices.length % 2 === 1) { choicesHtml += `<div class="column"></div></div>`; }
+      choicesHtml += `<div class="row" style="padding-top: 1em;"><div class="column" onclick="choiceClick(this)"><input type="radio" name="choices-${pollId}" value="0"> 총 상금에 보너스 금액으로 보태주기</div><div class="column"></div></div></br>`
+      choicesHtml += `</div>`;
+      choicesDiv.append(choicesHtml);
+      pollD.append(choicesDiv);
+
+      betDiv.append($(`<span>베팅 dKey 토큰수</span> <input type="text" id="betAmount-${pollId}" placeholder="0" style="width:150px; text-align: right;"> \
+                       <button class="button" onclick="pollBet('${pollId}')" >베팅하기</button>`));
+      betDiv.append($(`<div id="txResult-${pollId}"></div>`));
+
+      pollD.append(betDiv);
+      return pollD;
+    }
+
+    function choiceClick(ele) {
+      ele.firstElementChild.click();
+    }
+
+    async function pollBet(pollId){
+      let input = $(`#betAmount-${pollId}`).val() || 0
+      const betAmount = parseFloat(input)
+      const choice = $(`input[name='choices-${pollId}']:checked`).val()
+
+      var errorMsg = "";
+      if (betAmount < 1) errorMsg += "<li>최소 베팅금액은 1 DKEY 입니다. </li>";
+      if (betAmount > 10000) errorMsg += "<li>1회 최대 베팅금액은 10000 DKEY 입니다. </li>";
+      if (betAmount > parseFloat(tokenAllowed)) { errorMsg += "<li>사용할 수 있도록 허용된 DKEY 수가 부족합니다. 허용액을 늘려주세요.</li>"}
+      if (!choice) errorMsg += "<li>답변 중 하나를 선택해야 됩니다. </li>";
+      if (errorMsg) {
+        showMsg("<h5>베팅 오류:</h5>" + errorMsg);
+        return false;
+      }
+      var choiceHash;
+      if (choice === "0") {
+        choiceHash = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+      } else {
+        choiceHash = await getChoiceHash(pollAddr, pollId, myAddr, choice)   
+      }
+      
+      try {
+        var gas = await pollContract.methods.pollBet(pollId, choiceHash, betAmount).estimateGas({from: myAddr});
+      } catch(err) {
+        console.log(err)
+        showMsg("<h5>베팅 오류:</h5>" + "이미 종료된 설문이거나 다른 에러가 있습니다.");
+        return false;
+      }
+
+      pollContract.methods.pollBet(pollId, choiceHash, betAmount).send({from: myAddr, gas: gas})
+      .on('transactionHash', (txid) => {
+        $(`#txResult-${pollId}`).html(`트랜잭션 정보 txid: ${getLink(txid)} <span id="pending-${pollId}" style="color:red;"><img src="spin.gif">블록체인 컨펌 대기중...</span>`);    
+      })
+      .once('receipt', (receipt) => {
+        $(`#pending-${pollId}`).html(`<br>(기록된 블록: ${receipt.blockNumber})`);
+        $(`#pending-${pollId}`).css('color', 'green');
+        updateAllbalances();
+        updateSummary();
+        if(choice === "0") {
+          $(`#pollBonusAmount-${pollId}`).html(parseFloat($(`#pollBonusAmount-${pollId}`).html()) + parseFloat(betAmount));
+        }
+      })
+      .on('error', (error) => {
+        $(`#pending-${pollId}`).html(`<br>(트랜잭션 실행 실패)`);
+        $(`#pending-${pollId}`).css('color', 'red');
+      })
+    }
+
+    function activateTimer(targetId, secs, callback) {
+      let timer = new Timer();
+      let target = $(`#${targetId}`);
+      timer.start({countdown: true, startValues: {seconds: secs}});
+      target.html(timer.getTimeValues().toString());
+      timer.addEventListener('secondsUpdated', function (e) {
+        target.html(timer.getTimeValues().toString());
+      });
+      timer.addEventListener('targetAchieved', function (e) {
+        target.html('종료');
+        if (callback) {
+          callback(target);
+        }
+      });
+    }
+    function endPoll(poll) {
+      //remove bet feature
+    }
+    
+    async function apiPost(host, resource, data, accessToken) {
+      const headers = { 'Content-Type': 'application/json',
+                      'Accept': 'application/json' 
+                      }
+      if (accessToken) {
+        headers['Authorization'] = 'Bearer ' + accessToken
+      }
+      const url = host + resource;
+      return await fetch(url, { method: 'post', headers: headers, 
+        body: JSON.stringify(data) })
+    }
+
+    async function getChoiceHash(contract, pollId, address, choice) {
+      let api = 'https://blindpoll.atomrigs.io/api/v1/'
+      if (location.hostname === '127.0.0.1') api = 'http://127.0.0.1:3000/api/v1/'
+      const resource = 'getHash'
+      data = { contract, pollId, address, choice}
+      res = await apiPost(api, resource, data)
+      json = await res.json()
+      if (res.status == 200) {
+        return json.hash
+      } else {
+        return json.err
+      }
+    }
+
+    async function getNewBets() {
+      const currentBlock = await web3.eth.getBlockNumber();
+      pollContract.events.BetCreated({fromBlock: currentBlock})
+      .on("data", async function(r) { 
+        const pollId = r.returnValues.pollId;
+        const pollBetCount = parseFloat(r.returnValues.index) + 1;
+        const pollBetAmount = parseFloat($(`#pollBetAmount-${pollId}`).html()) + parseFloat(r.returnValues.amount);
+        $(`#pollBetCount-${pollId}`).html(pollBetCount).valAnimate();
+        $(`#pollBetAmount-${pollId}`).html(pollBetAmount).valAnimate();
+        await updateSummary();
+      })
+      .on("error", function(error, receipt){console.log(error);});
+    }
+
+    insertedPolls = [];
+
+    async function getPastPolls() {
+      $("#spinner2").toggle();
+      pastPolls.sort(function (a, b) { return b.end - a.end; });
+      let count = pastPolls.length;
+      for (let i=0; i<count; i++) {
+        p = pastPolls.pop();
+        let pollId = p.pollId;
+        if (!insertedPolls.includes(p.pollId)) {
+          var poll = await pollContract.methods.polls(pollId).call();          
+          var pollDetail = await pollContract.methods.pollDetails(pollId).call();
+          var pollPastDiv = await makePastPoll(pollId, poll, pollDetail, p.question, p.txid)
+          $(`#pastPolls`).prepend(pollPastDiv);
+          insertedPolls.push(p.pollId);
+        }
+      }
+      $("#spinner2").toggle();
+    }
+
+   
+    async function makePastPoll(pollId, poll, pollDetail, question, txid) {
+
+      var pollMode;
+      var winType;
+      if (poll.mode == 0) { 
+        pollMode = 'Low'; 
+        winType = ['', 'Low', 'Low']
+      }
+      else if (poll.mode == 1) { 
+        pollMode = 'High'; 
+        winType = ['', 'High', 'High']
+      }
+      else { 
+        pollMode = 'HighLow'; 
+        winType = ['', 'Low', 'High']
+      }
+      var pollState;            
+      if (pollDetail.isPaid) {
+        if (pollDetail.isTerminated) pollState = `<button onclick="getPastPollChoices('${pollId}', '${txid}', this)" class="button button-outline pastPollState" style="color: red;">중단</button>`;
+        else pollState = `<button onclick="getPastPollChoices('${pollId}', '${txid}', this)" class="button button-outline pastPollState" style="color: green;">정산완료 결과보기</button>`;
+      } else pollState = `<button onclick="getPastPollChoices('${pollId}', '${txid}', this)" class="button button-outline pastPollState" style="color: blue;">정산대기중...</button>`;
+
+      var pollPastDiv = $(`<div id="pastPoll-${pollId}" class="poll"></div>`);
+      var headDiv = $(`<div class="pollHead"></div>`);
+
+      headDiv.append($(`<div class="question">${question}</div>`));
+      var endTime = parseInt(poll.startTime) + parseInt(poll.duration);
+
+      headDiv.append($(`<span class="pollId"><span class="pollKey">설문번호: </span><span>${pollId}</span></span>`));
+      headDiv.append($(`<span class="pollMode"><span class="pollKey">게임모드: </span><span style="display: inline-block; width: 70px;">${pollMode}</span></span>`));
+      headDiv.append($(`<span class="pollEndTime"><span class="pollKey">종료시간: </span><span>${convertTimestamp(endTime)}</span></span>`));
+      var stateHtml = `<span class="pollTimeLeft"><span class="pollKey">상태: </span>${pollState}</span>`
+      headDiv.append($(stateHtml));
+      headDiv.append($(`<br>`));
+      headDiv.append($(`<span class="pollBetCount"><span class="pollKey">베팅횟수: </span><span id="pollBetCount-${pollId}">${pollDetail.betCount}</span></span>`));
+      headDiv.append($(`<span class="pollBetAmount"><span class="pollKey">총베팅액: </span><span id="pollBetAmount-${pollId}">${pollDetail.totalAmount}</span>DKEY</span>`));
+      headDiv.append($(`<span class="pollBetAmount"><span class="pollKey">(보너스액: </span><span id="pollBonusAmount-${pollId}">${pollDetail.bonusAmount}</span> DKEY)</span>`));
+      pollPastDiv.append(headDiv);
+      pollChoiceDiv = $(`<div id="pastPollChoices-${pollId}" class="pastPollChoices"></div>`);
+      pollPastDiv.append(pollChoiceDiv);
+      return pollPastDiv
+    }
+
+    async function getPastPollChoices(pollId, txid, ele) {
+      var btn = $(ele);
+      var target = $(`#pastPollChoices-${pollId}`);
+      if (btn.hasClass("displayOn")) {
+        btn.removeClass("displayOn");
+        btn.html(btn.val());
+        btn.val('');
+        target.css("display", "none");
+        return
+      } else {
+        btn.addClass("displayOn");
+        btn.val(btn.html());
+        btn.html("결과내용 닫기")
+        target.css("display", "block");
+      }
+      if (target.html()) {
+        return
+      }
+      $("#spinner2").toggle();
+      var choiceDiv = $(`#pastPollChoices-${pollId}`);
+      var betDiv = $(`<div class="pollBet"></div>`);
+
+      var poll = await pollContract.methods.polls(pollId).call();
+      var pollDetail = await pollContract.methods.pollDetails(pollId).call();
+      var pollTx = await web3.eth.getTransaction(txid);
+      var pollContent = inputDecoder.decode(pollAbi, pollTx.input);
+      var pollChoices = pollContent._choices;
+      //console.log(pollContent);
+
+      var pollResult = await pollContract.methods.getPollResult(pollId).call();
+      var pollWinChoices = await pollContract.methods.getWiningChoices(pollId).call();
+      var pollBets = await pollContract.methods.getBets(pollId).call();
+      var winType;
+      if (poll.mode == 0) { 
+        pollMode = 'Low'; 
+        winType = ['', 'Low', 'Low']
+      }
+      else if (poll.mode == 1) { 
+        pollMode = 'Low'; 
+        winType = ['', 'High', 'High']
+      }
+      else { 
+        pollMode = 'HighLow'; 
+        winType = ['', 'Low', 'High']
+      }
+
+      var betSummary = {};
+
+      for (let j=0; j < pollChoices.length+1; j++) {
+        betSummary[j.toString()] = {  betCount: 0, betAmount: 0, paidAmount: 0 };
+      }
+      pollBets.forEach(b => {
+        betSummary[b.choiceDecoded]['betCount'] += 1;
+        betSummary[b.choiceDecoded]['betAmount'] += parseFloat(b.betAmount);
+        betSummary[b.choiceDecoded]['paidAmount'] += parseFloat(b.paidAmount);
+
+      })          
+      let betSum = 0;
+      let paidSum = 0;
+      let choicesHtml = `<table class="pollResult">
+                          <tr>
+                            <td style="width: 5em;">선택번호</td>
+                            <td style="width: 5em;">승리</td>
+                            <td style="width: 5em;">베팅수</td>
+                            <td style="width: 5em;">입금</td>
+                            <td style="width: 5em;">출금</td>
+                            <td style="text-align: left;">답변</td>
+                          </tr>`;
+      for (let i=1; i < pollChoices.length+1; i++) {
+        betSum += parseFloat(pollResult[i]);
+        paidSum += betSummary[i]['paidAmount'];
+        choicesHtml +=   `<tr>
+                            <td>${i}</td>
+                            <td>${winType[parseInt(pollWinChoices[i])]}</td>
+                            <td>${betSummary[i]['betCount']}</td>
+                            <td>${pollResult[i]}</td> 
+                            <td>${betSummary[i]['paidAmount']}</td>
+                            <td style="text-align: left;">${pollChoices[i-1]}</td>
+                          </tr>`;
+      }
+
+      betSum += parseFloat(pollResult[0]);
+      paidSum += betSummary[0]['paidAmount'];
+      choicesHtml +=     `<tr>
+                            <td>보너스</td>
+                            <td></td>
+                            <td>${betSummary[0]['betCount']}</td>
+                            <td>${betSummary[0]['betAmount']}</td>
+                            <td></td>
+                            <td></td>
+                          </tr>`;
+
+      paidSum += parseFloat(pollDetail.operatorAmount);
+      choicesHtml += `<tr><td>운영자</td><td></td><td></td><td></td><td>${pollDetail.operatorAmount}</td><td></td></tr>`;
+
+      paidSum += parseFloat(pollDetail.creatorAmount);
+      choicesHtml += `<tr><td>작성자</td><td></td><td></td><td></td><td>${pollDetail.creatorAmount}</td><td></td></tr>`;
+
+      choicesHtml +=     `<tr>
+                            <td>합계</td>
+                            <td></td>
+                            <td></td>
+                            <td>${betSum}</td>
+                            <td>${paidSum}</td>
+                            <td></td>
+                          </tr>`;
+      choicesHtml += `</table>`;
+      choiceDiv.append(choicesHtml);
+      $("#spinner2").toggle();
+      return choiceDiv;
+    }
+
+    jQuery.fn.valAnimate = function() {
+      this.fadeOut().fadeIn('slow');
+    }
+
+    function doc_keyUp(e) {
+
+      if (e.ctrlKey && e.keyCode == 16) {
+          $('#pollStartTime').toggle();
+      }
+    }
+    document.addEventListener('keyup', doc_keyUp, false);
+
+    function checkImgUrl() {
+      $(".pollChoiceUrl").each(function(i, ele) {
+
+        var img = $('<img />').attr({
+            'class': 'urlImg',
+            'src': $(ele).val(),
+            'width': 50
+        })
+        var parent = $(ele).parent();
+        if (parent.has('img').length > 0) {
+          parent.children('img').remove();
+        } 
+        parent.append(img);
+      });
+    }
+
+    class inputDecoder {
+
+      static _typeToString(input) {
+        if (input.type === "tuple") {
+          return "(" + input.components.map(this._typeToString).join(",") + ")";
+         }
+        return input.type;
+      }
+      static _hashFunc(a) {        
+        return web3.utils.sha3(a.name + "(" + a.inputs.map(this._typeToString).join(",") + ")").slice(2,10);
+      }
+      static decode(abi, input) {
+        for(var a of abi) {
+          if (a.name && a.type == 'function') {
+            if(input.slice(2,10) === this._hashFunc(a)) {
+              return web3.eth.abi.decodeParameters(a.inputs, input.slice(10))              
+            }             
+          }
+        }
+        return 
+      }
+    }
+  </script>
+
+</div>
+</body>
+</html>
+
