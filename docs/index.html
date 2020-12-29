@@ -708,7 +708,7 @@
     }
 
     async function getChoiceHash(contract, pollId, address, choice) {
-      let api = 'https://blindpoll.atomrigs.io/api/v1/'
+      let api = 'https://blindminds.io/api/v1/'
       if (location.hostname === '127.0.0.1') api = 'http://127.0.0.1:3000/api/v1/'
       const resource = 'getHash'
       data = { contract, pollId, address, choice}
