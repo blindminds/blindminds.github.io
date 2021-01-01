@@ -237,6 +237,10 @@
       1337: "Gnache 로컬넷"
     };
     var pollHashes = [];
+    var pastPolls = [];
+    var incomingPolls = [];
+    var insertedPolls = [];
+    var pollTxs = {};
 
     window.addEventListener("load", function() {
 
@@ -339,8 +343,6 @@
         showMsg("<p>네트워크(체인)가 변경되었습니다!</p><button onclick='location.reload()'>다시 로딩하기</button>");
       });
     }
-
-
 
     function connectAccount() {
       ethereum
@@ -537,16 +539,13 @@
       .on("data", async function(r) { 
         let active = await pollParser(r) 
         if (active) {
-          activateTimer('timer-'+active.pollId, active.timeLeft, endPoll);        
+          activateTimer(active.pollId, active.timeLeft, endPoll);        
         }
         if ($("#spinner2").css("display") === "block") $("#spinner2").css("display", "none");
       })
       .on("error", function(error, receipt){console.log(error); $("#spinner2").toggle();});
       if ($("#spinner2").css("display") === "block") $("#spinner2").css("display", "none");
     }
-
-    var pastPolls = [];
-    var incomingPolls = [];
     
     async function pollParser(r){
       var txid = r.transactionHash;
@@ -559,6 +558,7 @@
       var pollId = r.returnValues.pollId;
       var question = r.returnValues.question;
       var timeLeft = end - now;
+      pollTxs[pollId] = txid;
       
       if (start <= now && end > now) { //active polls accepting new bets
         var pollDetail = await pollContract.methods.pollDetails(pollId).call();
@@ -570,13 +570,13 @@
           $("#activePolls").prepend(pollDiv);
           return { pollId, timeLeft };
         } else {
-          pastPolls.push({ pollId, start, end, question, txid });
+          pastPolls.push({ pollId, question, txid });
         }
       } else if (end <= now) { //finishied polls
-        pastPolls.push({ pollId, end, start, question , txid });
+        pastPolls.push({ pollId, question , txid });
         
       } else { //comming pools
-        incomingPolls.push({ pollId, end, start, question, txid });
+        incomingPolls.push({ pollId, question, txid });
       }
     }
 
@@ -676,23 +676,30 @@
       })
     }
 
-    function activateTimer(targetId, secs, callback) {
+    function activateTimer(pollId, secs, callback) {
       let timer = new Timer();
-      let target = $(`#${targetId}`);
+      let target = $(`#timer-${pollId}`);
       timer.start({countdown: true, startValues: {seconds: secs}});
-      target.html(timer.getTimeValues().toString());
+      target.html(timer.getTimeValues().toString(['days', 'hours', 'minutes', 'seconds']));
       timer.addEventListener('secondsUpdated', function (e) {
-        target.html(timer.getTimeValues().toString());
+        target.html(timer.getTimeValues().toString(['days', 'hours', 'minutes', 'seconds']));
       });
       timer.addEventListener('targetAchieved', function (e) {
         target.html('종료');
         if (callback) {
-          callback(target);
+          callback(pollId);
         }
       });
     }
-    function endPoll(poll) {
-      //remove bet feature
+    function endPoll(pollId) {
+      setTimeout(function(){ 
+        var poll = $(`#poll-${pollId}`);
+        var question = poll.find(".question").html()
+        var txid = pollTxs[pollId];
+        pastPolls.push({ pollId, question, txid })
+        poll.remove();
+        getPastPolls();
+      }, 3000);
     }
     
     async function apiPost(host, resource, data, accessToken) {
@@ -735,8 +742,6 @@
       .on("error", function(error, receipt){console.log(error);});
     }
 
-    insertedPolls = [];
-
     async function getPastPolls() {
       $("#spinner2").toggle();
       pastPolls.sort(function (a, b) { return b.end - a.end; });
@@ -754,7 +759,6 @@
       }
       $("#spinner2").toggle();
     }
-
    
     async function makePastPoll(pollId, poll, pollDetail, question, txid) {
 
@@ -916,7 +920,6 @@
     }
 
     function doc_keyUp(e) {
-
       if (e.ctrlKey && e.keyCode == 16) {
           $('#pollStartTime').toggle();
       }
@@ -925,7 +928,6 @@
 
     function checkImgUrl() {
       $(".pollChoiceUrl").each(function(i, ele) {
-
         var img = $('<img />').attr({
             'class': 'urlImg',
             'src': $(ele).val(),
