@@ -13,7 +13,7 @@ const network = 'kovan'
 const infuraId =  process.env.INFURA_API_KEY
 const infuraSecret = process.env.INFURA_SECRET
 const host = `https://:${infuraSecret}@${network}.infura.io/v3/${infuraId}`
-const wshost = `wss://:${infuraSecret}@${network}.infura.io/ws/v3/${infuraId}`
+const wshost = `wss://${network}.infura.io/ws/v3/${infuraId}`
 //const host = `https://kovan.infura.io/v3/${infuraId}`
 //const host = `wss://kovan.infura.io/ws/v3/${infuraId}`
 
