@@ -20,7 +20,8 @@
   <script src="https://cdn.jsdelivr.net/npm/easytimer@1.1.1/src/easytimer.min.js"></script>
    
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
 
   <title>블라인드 여론 조사 베팅 게임</title>
   <style>
@@ -28,10 +29,6 @@
     #content { max-width: 1000px; margin: auto; }
     #storedData { font-size:300%; margin-right:10px; }
     #newValue { width: 200px; margin-right:10px; text-align:right;}
-	  pre { padding: 20px; box-sizing: border-box; max-height:300px; overflow-y: auto; margin-top: 0px; }
-	  pre { white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap;  
-         white-space: -o-pre-wrap; word-wrap: break-word; }
-	  .comments { list-style-type: none;}
 
     ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
       color: lightgray;
@@ -40,14 +37,12 @@
     li { list-style-type: none;}
     .topMenu li { display: inline; margin: 0; padding-right: 15px; }
     #topState { text-align: right; }
-    #accountBal {border-radius: 20px; background: #f0f0f5; padding: 20px; margin-right: 15px; padding-bottom: 0px; }
-    #gameSum { border-radius: 20px; background: #f0f0f5; padding: 15px; padding-bottom: 0px; }
     #network {float: left;}
     .ui-widget button { font-size: 0.7em;}
     .ui-tabs .ui-tabs-nav li { border-top-left-radius: 15px; border-top-right-radius: 15px; }
-    .ui-state-active, .ui-state-active, .ui-state-active {background-color: #4359e8; }
-    .question { font-size: 130%;}
-    .poll { background-color: #f0f0f5; padding: 2rem; border-radius: 20px; margin-bottom: 2rem; }
+    .ui-state-active {background-color: #4359e8; }
+    .question { font-size: 130%; margin-top: 0.5em; background-color: #cbcbf1; padding-left: 1em; border-radius: 3px;}
+    .poll { background-color: #f0f0f5; padding: 2rem; border-radius: 5px; margin-bottom: 2rem; }
     .ui-widget.ui-widget-content {border: none; }
     .pollHead span { padding-right: 0.5rem; }
     .pollBetCount { display: inline-block; }
@@ -57,7 +52,7 @@
     #subTitle { font-size: 65%; margin-left: 1rem; }
     input.pollChoice { width: 30%; }
     input.pollChoiceUrl { max-width: 60%; }
-    img.choiceImg { display: block; margin-top: -0.7rem; max-width: 300px; max-height: 600px; border-radius: 10px;}
+    img.choiceImg { display: block; margin-top: -0.7rem; max-width: 200px; max-height: 300px; border-radius: 10px;}
     .pollResult { text-align: right; };
     td.resultChoice { text-align: left; }
     #spinner2 { position: fixed; left: 33%; opacity: 0.5; top: 45%; display: none;}
@@ -65,20 +60,24 @@
     ul.summary li { display: inline; margin-right: 0.5em; }
     span.legend { display: inline-block; background-color: lightblue; width: 0.5em; height: 0.5em; margin-right: 0.5em; }
     ul.faq li { list-style-type: circle; }
+    #topState { background: #f0f0f5; padding: 0.4em; border-radius: 3px; border: 1px solid #dddddd; color: #333333; }    
+    .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { background-color: #9b4dca;}
+    .ui-widget-header { border: 1px solid #dddddd;  background: #f0f0f5; color: #333333;   font-weight: bold; }
+    i.timer {margin-right: 0.3em; color: blue;}
+    span.gameMode { color: blue; font-weight: bold; }
   
 
   </style>
 </head>
 <body> 
 <div id="content">
-
   <h2 id="title"><span id="siteName">BlindMinds</span> <span id="subTitle"> 블라인드 여론조사 베팅 게임 </span></h2>
   <div id="msgAlert" style="display: none;">
   </div>
   <p>
     <button style="display:none;" id="btnConnect" onclick="connectAccount()">이더리움 연결하기</button>
   </p>
-  <ul id="topState" class="topMenu" style="background-color: #f0f0f5; padding: 0.4em; border-radius: 3px;">
+  <ul id="topState" class="topMenu">
     <li id="network"><span class="networkName"></span></li>
     <li>게임 컨트랙: <span class="pollAddr"></span></li>
     <li>내 어카운트: <span class="accountAddr"></span></li>
@@ -754,19 +753,31 @@
       var betDiv = $(`<div class="pollBet"></div>`);
 
       var pollMode;
-      if (poll.mode == 0) { pollMode = "Low"; }
-      else if (poll.mode == 1) { pollMode = "High"; }
-      else { pollMode = "HighLow"; }
+      var pollModeTooltip;
+      if (poll.mode == 0) { 
+        pollMode = "Low"; 
+        pollModeTooltip = "Low 게임은 가장 적은 금액의 베팅을 받은 선택지가 이기는 게임입니다.";
+      } else if (poll.mode == 1) { 
+        pollMode = "High"; 
+        pollModeTooltip = "High 게임은 가장 많은 금액의 베팅을 받은 선택지가 이기는 게임입니다.";
+      }
+      else { 
+        pollMode = "HighLow"; 
+        pollModeTooltip = "HighLow 게임은 가장 많거나 가장 적은 금액의 베팅을 받은 선택지가 이기는 게임입니다.";
+      }
       var endTime = parseInt(poll.startTime) + parseInt(poll.duration);
-      headDiv.append($(`<span class="pollId"><span class="pollKey">설문번호: </span><span>${pollId}</span></span>`));
-      headDiv.append($(`<span class="pollMode"><span class="pollKey">게임모드: </span><span>${pollMode}</span></span>`));
-      headDiv.append($(`<span class="pollEndTime"><span class="pollKey">종료시간: </span><span>${convertTimestamp(endTime)}</span></span>`));
-      headDiv.append($(`<span class="pollTimeLeft"><span class="pollKey">남은시간: </span><span id="timer-${pollId}"></span></span>`));
+
+
+      headDiv.append($(`<span title="${pollModeTooltip}" class="pollMode tooltip"><span class="legend"></span><span class="pollKey">게임모드: </span><span class="gameMode">${pollMode} <i class="fa fa-question-circle" aria-hidden="true"></i></span></span>`));
+      headDiv.append($(`<span class="pollEndTime"><span class="legend"></span><span class="pollKey">종료시간: </span><span>${convertTimestamp(endTime)}</span></span>`));
+      headDiv.append($(`<span class="pollTimeLeft"><span class="legend"></span><span class="pollKey">남은시간: </span>
+                        <i class="fa fa-clock-o timer"></i><span id="timer-${pollId}"></span></span>`));
       headDiv.append($(`<br>`))
-      headDiv.append($(`<span class="pollBetCount"><span class="pollKey">베팅횟수: </span><span id="pollBetCount-${pollId}">${pollDetail.betCount}</span></span>`));
-      headDiv.append($(`<span class="pollBetAmount"><span class="pollKey">총베팅액: </span><span id="pollBetAmount-${pollId}">${pollDetail.totalAmount}</span>DKEY</span>`));
-      headDiv.append($(`<span class="pollBetAmount"><span class="pollKey">(보너스액: </span><span id="pollBonusAmount-${pollId}">${pollDetail.bonusAmount}</span> DKEY)</span>`));
-      headDiv.append($(`<div class="question" style="margin-top: 1em;">${pollContent._question}</div>`));
+      headDiv.append($(`<span class="pollId"><span class="legend"></span><span class="pollKey">설문번호: </span><span>${pollId}</span></span>`));      
+      headDiv.append($(`<span class="pollBetCount"><span class="legend"></span><span class="pollKey">베팅횟수: </span><span id="pollBetCount-${pollId}">${pollDetail.betCount}</span></span>`));
+      headDiv.append($(`<span class="pollBetAmount"><span class="legend"></span><span class="pollKey">총베팅액: </span><span id="pollBetAmount-${pollId}">${pollDetail.totalAmount}</span>DKEY</span>`));
+      headDiv.append($(`<span class="pollBetAmount"><span class="legend"></span><span class="pollKey">(보너스액: </span><span id="pollBonusAmount-${pollId}">${pollDetail.bonusAmount}</span> DKEY)</span>`));
+      headDiv.append($(`<div class="question"><span>Q</spam> ${pollContent._question}</div>`));
       pollD.append(headDiv);
       let choicesHtml = `<div class="container">`;
       for (let i=0; i < pollContent._choices.length; i++) {
@@ -776,7 +787,9 @@
         if (i % 2 === 1) { choicesHtml += `</div><br>`; }
       }
       if (pollContent._choices.length % 2 === 1) { choicesHtml += `<div class="column"></div></div>`; }
-      choicesHtml += `<div class="row" style="padding-top: 1em;"><div class="column" onclick="choiceClick(this)"><input type="radio" name="choices-${pollId}" value="0"> 총 상금에 보너스 금액으로 보태주기</div><div class="column"></div></div></br>`
+      choicesHtml += `<div class="row" style="padding-top: 1em;"><div class="column" onclick="choiceClick(this)">
+                      <input type="radio" name="choices-${pollId}" value="0"> 총 상금에 보너스 금액으로 보태주기 </div>
+                      <div class="column"></div></div></br>`
       choicesHtml += `</div>`;
       choicesDiv.append(choicesHtml);
       pollD.append(choicesDiv);
@@ -1379,6 +1392,7 @@
       })
     }
     $( "#accordion" ).accordion();    
+    $(".tooltip").tooltip();
 
   </script>
 
