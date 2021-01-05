@@ -388,14 +388,7 @@
     var checkedPastMyBets = false;
 
     window.addEventListener("load", function() {
-
-      if (typeof window.ethereum !== "undefined") {
-        window.web3 = new Web3(window.ethereum);
-      } else if (typeof web3 !== "undefined") {
-        window.web3 = new Web3(web3.currentProvider);
-      } else {
-        window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-      }
+      loadWeb3();
       if (typeof window.web3 !== "undefined") {
         startApp();
       } else {
@@ -403,9 +396,21 @@
       }
     });
 
+    function loadWeb3() {
+      if (typeof window.ethereum !== "undefined") {
+        window.web3 = new Web3(window.ethereum);
+      } else if (typeof web3 !== "undefined") {
+        window.web3 = new Web3(web3.currentProvider);
+      } else {
+        window.web3 = new Web3("wss://kovan.infura.io/ws/v3/0629403549b344e6bc6a42754d2998dc");
+        //window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      }
+    }
+
     async function startApp() {
       try {
-        var currentChainId = parseInt(await ethereum.request({method: "eth_chainId"}));
+        var currentChainId = await web3.eth.getChainId();
+        //var currentChainId = parseInt(await ethereum.request({method: "eth_chainId"}));
         $(".networkName").html(networkList[currentChainId]);
         if (currentChainId != chainId) {
           var wrongChainMsg = "이 게임은 오직 " + networkList[chainId] + "에서만 작동합니다.<br> Dapp 브라우저의 네트워크를 바꾸어 주세요.";
@@ -423,16 +428,17 @@
 
     async function getAccount() {
       try {
-        var accounts = await ethereum.request({method: "eth_accounts"});
+        var accounts = await web3.eth.getAccounts();
+        //var accounts = await ethereum.request({method: "eth_accounts"});
         if (accounts.length > 0) {
           myAddr = web3.utils.toChecksumAddress(accounts[0]);
           $(".accountAddr").html(getLink(myAddr));
           $("#btnConnect").hide();
-          getContracts();
         } else {
           $("#btnConnect").show();
           console.log("No ethereum account is available!")
         }
+        getContracts();        
         web3.currentProvider.on("accountsChanged", (accounts) => {
           startApp();
           console.log(accounts);
@@ -472,7 +478,7 @@
         tokenContract = new web3.eth.Contract(tokenAbi, tokenAddr);
 
         $(".pollAddr").html(getLink(pollAddr));
-        await updateAllbalances();
+        if (myAddr) await updateAllbalances();
         await updateSummary();
         await getPolls();
         await getNewBets();
@@ -492,13 +498,17 @@
     }
 
     function connectAccount() {
+      if(typeof(ethereum) === "undefined") {
+        showMsg("이 Dapp을 사용하기 위해서는 디키즈(dKeys) 또는 메타마스크와 같은 Dapp 브라우저 지갑을 사용 하셔야 합니다. Dapp 브라우저 인스톨후 페이지를 리로딩 해주세요. ");
+        return
+      }
       ethereum
         .request({method: "eth_requestAccounts"})
         .then((accounts) => {
           myAddr = accounts[0];
           $("#accountAddr").html(getLink(myAddr));
           $("#btnConnect").css("display", "none");
-          startApp();
+          loadWeb3();
         })
         .catch((err) => {
           if (err.code === 4001) {
@@ -512,6 +522,10 @@
     }
 
     async function setTokenAllow(target) {
+      if(!myAddr) {
+        showMsg("디키즈나 메타마스크와 같은 Dapp 브라우저가 필요합니다. Dapp 인스톨후 리로딩 하세요.");
+        return
+      }      
       var value = BN($(`#${target}`).val()).multipliedBy(BN(10**decDigits)).toString(10);
       var gas = await tokenContract.methods.approve(pollAddr, value).estimateGas({from: myAddr});
       tokenContract.methods.approve(pollAddr, value).send({from: myAddr, gas: gas})
@@ -582,6 +596,10 @@
     }
 
     async function sendPoll() {
+      if(!myAddr) {
+        showMsg("디키즈나 메타마스크와 같은 Dapp 브라우저가 필요합니다. Dapp 인스톨후 리로딩 하세요.");
+        return
+      }
       var question = $("#pollQuestion").val();
       var mode = $("#pollMode").val();
       var choices = [];
@@ -748,6 +766,10 @@
     }
 
     function makePoll(pollId, poll, pollDetail, pollContent) {
+      if(!myAddr) {
+        showMsg("디키즈나 메타마스크와 같은 Dapp 브라우저가 필요합니다. Dapp 인스톨후 리로딩 하세요.");
+        return
+      }
       var pollChoices = pollContent._choices;
       var imgs = pollContent._choiceUrls;
       var pollD = $(`<div id="poll-${pollId}" class="poll"></div>`);
@@ -810,6 +832,10 @@
     }
 
     async function pollBet(pollId){
+      if(!myAddr) {
+        showMsg("디키즈나 메타마스크와 같은 Dapp 브라우저가 필요합니다. Dapp 인스톨후 리로딩 하세요.");
+        return
+      }
       let input = $(`#betAmount-${pollId}`).val() || 0
       const betAmount = parseFloat(input)
       const choice = $(`input[name='choices-${pollId}']:checked`).val()
@@ -1153,12 +1179,12 @@
     }    
 
     async function getMyBets() {
-      $("#spinner2").show();
       $("#myBets").show();
       $("#myPolls").hide();
       $("#btnGetMyPolls").addClass('button-outline');
       $("#btnGetMyBets").removeClass('button-outline');
-
+      if(!myAddr) return
+      $("#spinner2").show();      
       var toBlock = await web3.eth.getBlockNumber();      
       if (!checkedPastMyBets) {
         var fromBlock = await pollContract.methods.deployedBlock().call();
