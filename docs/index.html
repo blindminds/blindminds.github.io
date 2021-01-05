@@ -766,10 +766,6 @@
     }
 
     function makePoll(pollId, poll, pollDetail, pollContent) {
-      if(!myAddr) {
-        showMsg("디키즈나 메타마스크와 같은 Dapp 브라우저가 필요합니다. Dapp 인스톨후 리로딩 하세요.");
-        return
-      }
       var pollChoices = pollContent._choices;
       var imgs = pollContent._choiceUrls;
       var pollD = $(`<div id="poll-${pollId}" class="poll"></div>`);
