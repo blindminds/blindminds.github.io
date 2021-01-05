@@ -250,7 +250,7 @@
               <li>블라인드 조사란 참여자가 선택한 선택지가 시크릿 암호와 함께 해시되어 있어서 사전에는 알 수가 없고, 베팅이 모두 끝난 후에 이를 공개해서 결과를 정산합니다.</li>
               <li>그런데, 이를 공개하기 위해서는 참여자가 직접 이 시크릿 솔트를 공개(reveal)해야만 합니다. 경제적 동기가 없는 테스트넷에서 참여자가 직접 공개하게 하기에는 
               참여율이 너무 저조할 것 같아, 이번 테스트넷 버전에서는 부득이하게 저희 서버가 매 설문마다 해시를 위한 시크릿암호를 임의로 선정하고, 설문이 끝난후 공개하도록
-              되어있습니다. 하지만 정산과정을 비롯한 해시검증, 데이터 처리, 정산과정은 모두 탈중앙화된 스마트컨트랙에 의해 처리됩니다. </li>
+              되어 있습니다. 하지만 정산과정을 비롯한 해시검증, 데이터 처리 등 모든 과정은 탈중앙화된 스마트컨트랙에 의해 처리됩니다. </li>
               <li>향후 레이어2 또는 메인넷 버전에서는 참여자가 직접 시크릿 솔트를 선택하고, 설문 종료후 이를 공개하는 방식을 취할 예정입니다. 이렇게 되면 어떤 중앙화된 서버의 도움없이 
               완전한 탈중앙화된 방식으로 모든 과정이 진행될 것입니다. </li>
             </ul>
@@ -427,9 +427,10 @@
         if (accounts.length > 0) {
           myAddr = web3.utils.toChecksumAddress(accounts[0]);
           $(".accountAddr").html(getLink(myAddr));
+          $("#btnConnect").hide();
           getContracts();
         } else {
-          getElem("btnConnect").style.display = "block";   
+          $("#btnConnect").show();
           console.log("No ethereum account is available!")
         }
         web3.currentProvider.on("accountsChanged", (accounts) => {
@@ -442,6 +443,7 @@
         });
 
       } catch(err) {
+        $("#btnConnect").show();
         console.log(err);}
     }
 
@@ -680,18 +682,19 @@
     }
 
     async function getPolls() {
+      $("#spinner2").show();      
       var startingBlock = await pollContract.methods.deployedBlock().call();
-      $("#spinner2").toggle();
+
       pollContract.events.PollCreated({fromBlock: startingBlock})
       .on("data", async function(r) { 
+        $("#spinner2").show();
         let active = await pollParser(r) 
         if (active) {
           activateTimer(active.pollId, active.timeLeft, endPoll);        
+          $("#spinner2").hide();
         }
-        //if ($("#spinner2").css("display") === "block") $("#spinner2").css("display", "none");
       })
-      .on("error", function(error, receipt){console.log(error); $("#spinner2").toggle();});
-      if ($("#spinner2").css("display") === "block") $("#spinner2").css("display", "none");
+      .on("error", function(error, receipt){console.log(error); $("#spinner2").hide();});
     }
     
     async function pollParser(r){
