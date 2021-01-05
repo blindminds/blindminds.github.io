@@ -1,6 +1,6 @@
-// @title HighLow Poll Game
+// @title BlindMinds.io Poll Betting Game
 // @author Atomrigs Lab
-// @version 1.0.8
+// @version 1.1
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.8.0;
@@ -71,6 +71,7 @@ contract BlindPollBet {
     using SafeMath for uint32;
     
     struct Bet {
+        bool isPaid;
         uint8 choiceDecoded;
         address bettor;        
         uint32 betAmount;
@@ -179,7 +180,8 @@ contract BlindPollBet {
                         string memory _question,
                         string[] memory _choices,
                         string[] memory _choiceUrls,
-                        uint8 _mode
+                        uint8 _mode,
+                        string memory _jsonData                        
                         ) public returns (uint256 pollId) {
         require(newPollAllow, "The game does not accept new polls at the moment.");
         uint8 choiceCount = uint8(_choices.length);
@@ -271,6 +273,7 @@ contract BlindPollBet {
         require(_betAmount <= gameRule.maxBetAmount, "The bet amount exceeded the allowed limit.");
 
         Bet memory bet = Bet({
+            isPaid: false,
             choiceDecoded: 0,
             bettor: msg.sender,
             betAmount: _betAmount,            
@@ -446,6 +449,7 @@ contract BlindPollBet {
                 c.totalPaidAmount = c.totalPaidAmount.add(paidAmount);
                 emit PollPaid(_pollId, bet.bettor, paidAmount, 1);
             }
+            bet.isPaid = true;
         }
 
         if (c.creatorAmount > 0) {
@@ -503,6 +507,7 @@ contract BlindPollBet {
             Bet storage bet = targetBets[i];
             require(token.transfer(bet.bettor, decimal.mul(bet.betAmount)));
             bet.paidAmount = bet.betAmount;
+            bet.isPaid = true;
             emit PollPaid(_pollId, bet.bettor, bet.betAmount, 0);
         }
         pollDetail.isPaid = true;
