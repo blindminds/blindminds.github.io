@@ -509,6 +509,7 @@
           $("#accountAddr").html(getLink(myAddr));
           $("#btnConnect").css("display", "none");
           loadWeb3();
+          startApp();
         })
         .catch((err) => {
           if (err.code === 4001) {
@@ -1132,9 +1133,13 @@
 
     function checkImgUrl() {
       $(".pollChoiceUrl").each(function(i, ele) {
+        var src = $(ele).val();
+        if (src.search("googleusercontent.com") > 0) {
+          return true;
+        }
         var img = $('<img />').attr({
             'class': 'urlImg',
-            'src': $(ele).val(),
+            'src': src,
             'width': 50
         })
         var parent = $(ele).parent();
@@ -1418,6 +1423,20 @@
     }
     $( "#accordion" ).accordion();    
     $(".tooltip").tooltip();
+    function fixImages() {
+      $.getJSON("fix-img.json", function(data){
+        data.forEach( r => {
+          var target =  $(`img[src$='${r.old}']`)
+          if (target.length > 0) {
+            target.attr('src', r.new);
+          }
+        })
+      }).fail(function(){
+        console.log("processing fix-img.json failed");
+      });
+    }
+
+      fixImages();
 
   </script>
 
