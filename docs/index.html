@@ -92,6 +92,11 @@
     <li><span class="legend"></span>토큰 허용액: <span class="tokenAllowed"></span>
     <a class="button button-outline" href="#modal-tokenAllow" rel="modal:open">허용액 설정하기</a>
   </ul>
+  <div id="marketing">
+    <div style="max-width:600px; margin: auto;">
+      <h5 onclick="showEvent();" style="text-decoration: underline; color: #9b4dca"><i class="fa fa-hand-o-right" aria-hidden="true" style="color: blue; margin-right: 0.5em;"></i> 게임을 하기 위한 DKEY 토큰이 필요한가요?</h5>
+    </div>
+  </div>
   <!-- modal-->  
   <div id="modal-tokenAllow" class="modal">
     <h4> DKEY 토큰 허용액 설정하기 </h4>
@@ -160,7 +165,7 @@
             </p>
             <p></p>
             <label for="startTime">오픈 기간</label>        
-            <input type="text" id="durationHours" value="24" style="width: 60px; text-align: right;"> 시간 (최대 168 시간)
+            <input type="text" id="durationHours" value="24" style="width: 60px; text-align: right;"> 시간 (최대 36 시간)
             <p></p>
             <!-- button class="button button-outline" onclick="toggleCreatePoll()">취소 하기</button --> 
             <button class="button button-outline" onclick="resetCreatePoll()">새로 고치기</button> 
@@ -631,7 +636,7 @@
       else if (choices.length < 2) {errorMsg += "<li>최소한 2개 이상의 선택지 내용이 필요합니다.</li>";}
       if (choices.length != choiceUrls.length) {errorMsg += "중간에 비어있는 답변이 있습니다.";}
       if (startTimeLaterHours > 24) {errorMsg += "<li>시작 시간은 24시간 이내로만 설정할 수 있습니다.</li>";}
-      if (durationHours > 168) {errorMsg += "<li>오픈 기간은 최대 168시간까지만 가능합니다.</li>";}
+      if (durationHours > 36) {errorMsg += "<li>오픈 기간은 최대 36시간까지만 가능합니다.</li>";}
       if (errorMsg) {
         showMsg("<h5>새 여론조사 작성오류:</h5>" + errorMsg);
         return false;
@@ -1426,6 +1431,18 @@
         $(`#pending-sendDkey-tx`).css('color', 'red');
       })
     }
+
+    function showEvent() {
+      var msg = `
+      <h4>dKeys Dapp 크롬 익스텐션 지갑 이벤트</h4>
+      <ul>
+        <li>dKeys Dapp 브라우저 지갑을 깔고 퀘스트를 수행하면 2000 DKEY ~ 10,000 DKEYS 이상을 받을 수 있습니다.</li>
+        <li>True 2FA와 자동컨펌 기능을 내장한 최첨단 DKEYS 크롬 익스텐션 지갑을 이용해 BlindMinds 게임에 참여해 보세요.</li>
+        <li><a href="https://www.dkeys.io/event" class="button" target="_blank">이벤트 참여하기</a></li>
+      </ul>`
+      showMsg(msg);
+    }
+
     $( "#accordion" ).accordion();    
     $(".tooltip").tooltip();
 
