@@ -65,7 +65,7 @@
     .ui-widget-header { border: 1px solid #dddddd;  background: #f0f0f5; color: #333333;   font-weight: bold; }
     i.timer {margin-right: 0.3em; color: blue;}
     span.gameMode { color: blue; font-weight: bold; }
-  
+    input.solid {border: solid 1px #9b4dca;}
 
   </style>
 </head>
@@ -102,7 +102,7 @@
       <li style="width:350px;"><b>현재 DKEY 잔고:</b> <span class="tokenBalance" style="float:right;"></span></li>
       <li style="width:350px;"><b>현재 DKEY 허용:</b> <span class="tokenAllowed" style="float:right;"></span></li>
       <li><b> DKEY 허용액 설정:</b>
-          <input type="text" id="newTokenAllowAmt" value="0", style="width:150px; text-align: right;">
+          <input type="text" id="newTokenAllowAmt" class="solid" value="0", style="width:150px; text-align: right;">
           <button class="button" onclick="return setTokenAllow('newTokenAllowAmt')">설정하기</button>
       </li>
     </ul>
@@ -347,8 +347,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.2.11/dist/web3.min.js"></script>
   <!-- script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script -->
-  <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
-    
+      
   <script>
     var BN = BigNumber;
     var pollAbi
@@ -402,7 +401,8 @@
       } else if (typeof web3 !== "undefined") {
         window.web3 = new Web3(web3.currentProvider);
       } else {
-        window.web3 = new Web3("wss://kovan.infura.io/ws/v3/0629403549b344e6bc6a42754d2998dc");
+        if (location.hostname === '127.0.0.1') window.web3 = new Web3("wss://kovan.infura.io/ws/v3/0629403549b344e6bc6a42754d2998dc");
+        else window.web3 = new Web3("wss://kovan.eth.dkeys.io:9546/blindminds");
         //window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
       }
     }
@@ -816,7 +816,7 @@
       choicesDiv.append(choicesHtml);
       pollD.append(choicesDiv);
 
-      betDiv.append($(`<span>베팅 dKey 토큰수</span> <input type="text" id="betAmount-${pollId}" placeholder="0" style="width:150px; text-align: right;"> \
+      betDiv.append($(`<span>베팅 dKey 토큰수</span> <input type="text" id="betAmount-${pollId}" placeholder="0" class="solid" style="width:150px; text-align: right;"> \
                        <button class="button" onclick="pollBet('${pollId}')" >베팅하기</button>`));
       betDiv.append($(`<div id="txResult-${pollId}"></div>`));
 
