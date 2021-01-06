@@ -745,8 +745,8 @@
       var question = r.returnValues.question;
       var creator = r.returnValues.creator;
       var mode = r.returnValues.mode;
-      if (mode === 0) mode = 'Low';
-      else if (mode === 1) mode = 'High';
+      if (mode === "0") mode = 'Low';
+      else if (mode === "1") mode = 'High';
       else mode = 'HighLow';
       var timeLeft = end - now;
       var p = { pollId, question, creator, mode, start, end, timeLeft, txid };
