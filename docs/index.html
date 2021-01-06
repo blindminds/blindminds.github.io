@@ -710,8 +710,8 @@
         let active = await pollParser(r) 
         if (active) {
           activateTimer(active.pollId, active.timeLeft, endPoll);        
-          $("#spinner2").hide();
         }
+        $("#spinner2").hide();
       })
       .on("error", function(error, receipt){console.log(error); $("#spinner2").hide();});
     }
@@ -947,7 +947,7 @@
     }
 
     async function getPastPolls() {
-      $("#spinner2").toggle();
+      $("#spinner2").show();
       pastPolls.sort(function (a, b) { return b.end - a.end; });
       let count = pastPolls.length;
       for (let i=0; i<count; i++) {
@@ -961,7 +961,7 @@
           insertedPolls.push(p.pollId);
         }
       }
-      $("#spinner2").toggle();
+      $("#spinner2").hide();
     }
    
     async function makePastPoll(pollId, poll, pollDetail, question, txid) {
@@ -1025,7 +1025,7 @@
       if (target.html()) {
         return
       }
-      $("#spinner2").toggle();
+      $("#spinner2").show();
       var choiceDiv = $(`#pastPollChoices-${pollId}`);
       var betDiv = $(`<div class="pollBet"></div>`);
 
@@ -1115,7 +1115,7 @@
                           </tr>`;
       choicesHtml += `</table>`;
       choiceDiv.append(choicesHtml);
-      $("#spinner2").toggle();
+      $("#spinner2").hide();
       return choiceDiv;
     }
 
@@ -1361,7 +1361,7 @@
     }
 
     async function getMyPolls() {
-      $("#spinner2").toggle();
+      $("#spinner2").show();
       $("#myBets").hide();
       $("#myPolls").show();
       $("#btnGetMyPolls").removeClass('button-outline');
@@ -1379,7 +1379,7 @@
           insertedMyPolls.push(p.pollId);
         }
       }
-      $("#spinner2").toggle();   
+      $("#spinner2").hide();   
     }
 
 
