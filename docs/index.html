@@ -700,8 +700,10 @@
       $("#totalBetAmount").html(gameInfo.totalBetAmount + ' DKEY')
     }
 
+    var imgFixData
     async function getPolls() {
-      $("#spinner2").show();      
+      $("#spinner2").show();
+      imgFixData = await $.getJSON(`fix-img.json?q=${Date.now()}`)      
       var startingBlock = await pollContract.methods.deployedBlock().call();
 
       pollContract.events.PollCreated({fromBlock: startingBlock})
@@ -803,9 +805,12 @@
       pollD.append(headDiv);
       let choicesHtml = `<div class="container">`;
       for (let i=0; i < pollContent._choices.length; i++) {
+        var img = imgs[i];
+        if (imgFixData[img]) img = imgFixData[img];
+
         if (i % 2 === 0) { choicesHtml += `<div class="row">`; }
         choicesHtml += `<div class="column" onclick="choiceClick(this)"><input type="radio" name="choices-${pollId}" value="${i+1}"> ${i+1}. ${pollChoices[i]}
-                        <img class="choiceImg" src="${imgs[i]}"></div>`;
+                        <img class="choiceImg" src="${img}"></div>`;
         if (i % 2 === 1) { choicesHtml += `</div><br>`; }
       }
       if (pollContent._choices.length % 2 === 1) { choicesHtml += `<div class="column"></div></div>`; }
@@ -1423,21 +1428,8 @@
     }
     $( "#accordion" ).accordion();    
     $(".tooltip").tooltip();
-    function fixImages() {
-      $.getJSON("fix-img.json", function(data){
-        data.forEach( r => {
-          var target =  $(`img[src$='${r.old}']`)
-          if (target.length > 0) {
-            target.attr('src', r.new);
-          }
-        })
-      }).fail(function(){
-        console.log("processing fix-img.json failed");
-      });
-    }
 
-      fixImages();
-
+   
   </script>
 
 </div>
