@@ -402,7 +402,7 @@
         window.web3 = new Web3(web3.currentProvider);
       } else {
         if (location.hostname === '127.0.0.1') window.web3 = new Web3("wss://kovan.infura.io/ws/v3/0629403549b344e6bc6a42754d2998dc");
-        else window.web3 = new Web3("wss://kovan.eth.dkeys.io:9546/blindminds");
+        else window.web3 = new Web3("https://kovan.eth.dkeys.io:9545/blindminds");
         //window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
       }
     }
