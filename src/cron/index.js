@@ -95,7 +95,7 @@ const downloadPolls = async (fromBlock) => {
   return pendingList
 }
 
-const batchPayPoll = async () => {
+const batchPayPoll_ori = async () => {
 
   //let iProvider = new HDWalletProvider(readMnemonic(), host, 1)
   //let iWeb3 = new Web3(iProvider)
@@ -124,6 +124,36 @@ const batchPayPoll = async () => {
     }
   })
   
+  db.put('polls-pending', newPending)  
+  return newPending
+}
+
+
+const batchPayPoll = async () => {
+
+  let iPollContract = new web3.eth.Contract(pollAbi, pollAddr)
+  let pendingList = await downloadPolls()
+  newPending = []
+  for (let pollId of pendingList) {
+    let now = parseInt(Date.now()/1000)
+    let poll = db.get(`poll-${pollId}`)
+    if (poll.endTime < now) {
+      let pd = await iPollContract.methods.pollDetails(pollId).call()
+      if (pd.isPaid || pd.isTerminated) {
+        console.log(`PollId ${pollId} is already processed...`)
+      } else {
+        console.log(`processing ${pollId}...`)
+        try {
+          await payPoll(poll.pollId, iPollContract)
+        } catch(err) {
+          newPending.push(pollId) //try again
+          console.log(err)
+        }
+      }
+    } else {
+      newPending.push(pollId)
+    }
+  }
   db.put('polls-pending', newPending)  
   return newPending
 }
