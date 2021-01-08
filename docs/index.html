@@ -21,22 +21,26 @@
    
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-      
 
   <title>블라인드 여론 조사 베팅 게임</title>
   <style>
-    body { margin-left:50px; margin-top: 30px; margin-right:50px; }
-    #content { max-width: 1000px; margin: auto; }
+    body { margin-left: 1em; margin-right: 1em; font-size: 1.4em; font-weight: 300; line-height: 1.4;}
+    #siteName { color: #9b4dca; font-family: system-ui; font-weight: 400; font-size: 3.2rem; }
+    #subTitle { font-size: 65%; margin-left: 1rem;}
     #storedData { font-size:300%; margin-right:10px; }
     #newValue { width: 200px; margin-right:10px; text-align:right;}
+    #topState { background: #f0f0f5; padding: 0.4em; border-radius: 3px; border: 1px solid #dddddd; color: #333333; padding-bottom: 0px; text-align: right; margin-top: 0.5em; }   
+    #topMenu { padding-left: 0.5em; }
+    ul.allowInfo { width: 18em; }     
+    #createPoll { background-color: #f0f0f5; padding: 20px; }
+    .ui-tabs .ui-tabs-panel { padding: 0px; padding-top: 1em; }
 
     ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
       color: lightgray;
       opacity: 1; /* Firefox */
     }
     li { list-style-type: none;}
-    .topMenu li { display: inline; margin: 0; padding-right: 15px; }
-    #topState { text-align: right; }
+
     #network {float: left;}
     .ui-widget button { font-size: 0.7em;}
     .ui-tabs .ui-tabs-nav li { border-top-left-radius: 15px; border-top-right-radius: 15px; }
@@ -48,8 +52,6 @@
     .pollBetCount { display: inline-block; }
     ul { margin-bottom: 1rem; }
     .pollChoices { margin-top: 1rem; }
-    #siteName { color: #9b4dca; font-family: system-ui; font-weight: 500; }
-    #subTitle { font-size: 65%; margin-left: 1rem; }
     input.pollChoice { width: 30%; }
     input.pollChoiceUrl { max-width: 60%; }
     img.choiceImg { display: block; margin-top: -0.7rem; max-width: 200px; max-height: 300px; border-radius: 10px;}
@@ -60,14 +62,33 @@
     ul.summary li { display: inline; margin-right: 0.5em; }
     span.legend { display: inline-block; background-color: lightblue; width: 0.5em; height: 0.5em; margin-right: 0.5em; }
     ul.faq li { list-style-type: circle; }
-    #topState { background: #f0f0f5; padding: 0.4em; border-radius: 3px; border: 1px solid #dddddd; color: #333333; }    
     .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { background-color: #9b4dca;}
     .ui-widget-header { border: 1px solid #dddddd;  background: #f0f0f5; color: #333333;   font-weight: bold; }
     i.timer {margin-right: 0.3em; color: blue;}
     span.gameMode { color: blue; font-weight: bold; }
     input.solid { border: solid 1px #9b4dca; }
     #btnConnect { margin-bottom: 0px; }
+    .min600 { display: none };    
 
+    .topnav { overflow: hidden; background-color: #333;  position: relative; }
+    .topnav a { font-family: 'Roboto'; font-weight: 600; font-size: 1.5em;  color: white;  padding: 10px 12px;  text-decoration: none; display: block;}
+    .active { background-color: #9b4dca; color: white; }
+
+  @media only screen and (min-width: 600px) {
+    body { margin-left: 50px; margin-top: 30px; margin-right: 50px; font-size: 1.6em; font-weight: 400; line-height: 1.6;}      
+
+    #siteName { color: #9b4dca; font-family: 'Roboto'; font-weight: 600; font-size: 3.6rem; }
+    #subTitle { font-size: 65%; margin-left: 1rem; }
+    #topState { padding-bottom: 0.4em; text-align: right;}
+    #network { padding-top: 0.3em; }
+    #topState li  { display: inline; }
+    #topMenu { padding-right: 15px; padding-top: 5px; text-align:right; }
+    #topMenu li { display: inline }
+    #content { max-width: 1000px; margin: auto; }
+    .max600 { display: none; }
+    .min600 { display: block };    
+    
+  }
   </style>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -80,20 +101,27 @@
     gtag('config', 'G-EYTVS0R64X');
   </script>  
 </head>
-<body> 
+<body>
 <div id="content">
-  <h2 id="title"><span id="siteName">BlindMinds</span> <span id="subTitle"> 블라인드 여론조사 베팅 게임 </span></h2>
+  <div class="min600">
+    <h2 id="title"><span id="siteName">BlindMinds</span> <span id="subTitle"> 블라인드 여론조사 베팅 게임 </span></h2>
+  </div>
+  <div class="max600">
+    <div class="topnav">
+      <a href="" class="active">BlindMinds <span id="subTitle"> 블라인드 여론조사 베팅 게임 </span></a>
+    </div>
+  </div>
+
+  <!-- Top Navigation Menu -->
+
   <div id="msgAlert" style="display: none;">
   </div>
-  <p>
-    <!--button style="display:none;" id="btnConnect" onclick="connectAccount()">지갑 연결하기</button -->
-  </p>
-  <ul id="topState" class="topMenu">
+  <ul id="topState">
     <li id="network"><span class="networkName"></span></li>
     <li>게임 컨트랙: <span class="pollAddr"></span></li>
     <li>내 어카운트: <span class="accountAddr"></span> <button style="display:none;" id="btnConnect" onclick="connectAccount()">지갑 연결하기</button></li>
   </ul>  
-  <ul class="topMenu" style="text-align: right;">
+  <ul id="topMenu">
     <!--li><span class="legend"></span><ETH 잔고: <span class="ethBalance"></span></li -->
       <li><span class="legend"></span>설문수 <span id="pollCount"></span></li>
       <li><span class="legend"></span>베팅수 <span id="totalBetCount"></span></li>
@@ -114,14 +142,14 @@
     <p> 게임에서 DKEY 토큰을 사용하기 위해서는 미리 허용액을 설정해야 합니다. 
         허용액을 설정하더라도 실제 토큰을 전송하는 것은 아니며, 게임 내에서 베팅시 바로 사용할 수 있도록 허용하는 것입니다. 베팅할 때 마다 이 할당액에서 차감됩니다.
     </p>
-    <ul>
-      <li style="width:350px;"><b>현재 DKEY 잔고:</b> <span class="tokenBalance" style="float:right;"></span></li>
-      <li style="width:350px;"><b>현재 DKEY 허용:</b> <span class="tokenAllowed" style="float:right;"></span></li>
-      <li><b> DKEY 허용액 설정:</b>
-          <input type="text" id="newTokenAllowAmt" class="solid" value="0", style="width:150px; text-align: right;">
-          <button class="button" onclick="return setTokenAllow('newTokenAllowAmt')">설정하기</button>
-      </li>
-    </ul>
+    <ul class="allowInfo">
+      <li></li><b>현재 DKEY 잔고:</b> <span style="float: right;" class="tokenBalance"></span></li>
+      <li><b>현재 DKEY 허용:</b> <span style="float: right;" class="tokenAllowed"></span></li>
+    </ul>      
+    <b> DKEY 허용액 설정:</b>
+    <input type="text" id="newTokenAllowAmt" class="solid" value="0", style="width:150px; text-align: right;">
+    <button class="button" onclick="return setTokenAllow('newTokenAllowAmt')">설정하기</button>
+      
     <div id="newTokenAllowAmt-tx"></div>
     <!-- a href="#" rel="modal:close">Close</a -->
   </div>
@@ -133,11 +161,12 @@
     <ul>
       <li><a href="#tabs-1">진행 중인 설문</a></li>
       <li onclick="getPastPolls()"><a href="#tabs-2">끝난 설문</a></li>
-      <li><a href="#tabs-3">새 설문 만들기</a></li>
+      <li><a href="#tabs-3" id="tab-3-menu">새 설문 만들기</a></li>
       <li onclick="getMyBets()"><a href="#tabs-4">내 기록</a></li>
       <li><a href="#tabs-5">DKEY 관리</a></li>
       <li><a href="#tabs-6">FAQ</a></li>
     </ul>
+
     <div id="tabs-1" class="tab">
       <div id="activePolls">
       </div>
@@ -147,7 +176,7 @@
       </div>
     </div>
     <div id="tabs-3" class="tab">
-      <div id="createPoll" style="width: 750px; background-color: #f7f7f7; padding: 20px;">
+      <div id="createPoll">
         <form id="formCreatePoll">
           <fieldset>
             <label for="pollMode">게임 방식</label>
