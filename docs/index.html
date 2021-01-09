@@ -902,7 +902,7 @@
 
       var errorMsg = "";
       if (betAmount < 1) errorMsg += "<li>최소 베팅금액은 1 DKEY 입니다. </li>";
-      if (betAmount > 10000) errorMsg += "<li>1회 최대 베팅금액은 10000 DKEY 입니다. </li>";
+      if (betAmount > 1000) errorMsg += "<li>1회 최대 베팅금액은 1000 DKEY 입니다. </li>";
       if (betAmount > parseFloat(tokenAllowed)) { errorMsg += "<li>사용할 수 있도록 허용된 DKEY 수가 부족합니다. 허용액을 늘려주세요.</li>"}
       if (!choice) errorMsg += "<li>답변 중 하나를 선택해야 됩니다. </li>";
       if (errorMsg) {
