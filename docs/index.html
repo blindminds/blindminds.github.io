@@ -1373,7 +1373,7 @@
       $(`#myTotalBet-${pollId}`).html(totalBet);
       var totalPaid = parseFloat($(`#myPaidAmount-${pollId}`).html()) + paidAmount;
       $(`#myPaidAmount-${pollId}`).html(totalPaid);
-      var totalRatio = parseInt(100*totalPaid / totalBet);
+      var totalRatio = parseInt(100*(totalPaid-totalBet) / totalBet);
       $(`#myTotalRatio-${pollId}`).html(totalRatio);
 
 
