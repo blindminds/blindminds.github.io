@@ -1503,7 +1503,7 @@
                         <tr id="ranks-lastRow">
                           <td colspan="6">
                         </tr>`
-      $(`#ranks`).append($(rankTable));
+      $(`#ranks`).html("").append($(rankTable));
       $(`#ranks`).append($(`<div id="rankProcess"></div>`))
 
       var gameInfo = await pollContract.methods.gameInfo().call()
