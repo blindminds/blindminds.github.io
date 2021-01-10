@@ -162,9 +162,10 @@
       <li><a href="#tabs-1">진행 중인 설문</a></li>
       <li onclick="getPastPolls()"><a href="#tabs-2">끝난 설문</a></li>
       <li><a href="#tabs-3" id="tab-3-menu">새 설문 만들기</a></li>
-      <li onclick="getMyBets()"><a href="#tabs-4">내 기록</a></li>
-      <li><a href="#tabs-5">DKEY 관리</a></li>
-      <li><a href="#tabs-6">FAQ</a></li>
+      <li onclick="getRanking()"><a href="#tabs-4" id="tab-4-menu">랭킹</a></li>
+      <li onclick="getMyBets()"><a href="#tabs-5">내 기록</a></li>
+      <li><a href="#tabs-6">DKEY 관리</a></li>
+      <li><a href="#tabs-7">FAQ</a></li>
     </ul>
 
     <div id="tabs-1" class="tab">
@@ -217,7 +218,10 @@
 
     
     </div>
-    <div id="tabs-4">
+    <div id="tab-4" class="tab">
+      <div id="ranks"></div>
+    </div>
+    <div id="tabs-5">
       <button onclick="getMyBets()" class="button" id="btnGetMyBets">나의 베팅 현황</button> 
       <button onclick="getMyPolls()" class="button button-outline" id="btnGetMyPolls">내가 만든 설문 보기</button>
       <div id="myBets">
@@ -236,7 +240,7 @@
       <div id="myPolls" style="display: none;">
       </div>      
     </div>
-    <div id="tabs-5">
+    <div id="tabs-6">
       <h4>DKEY 지갑</h4>
       <ul>
         <li>내 어카운트: <span class="accountAddr"></span></li>
@@ -260,7 +264,7 @@
 
 
     </div>
-    <div id="tabs-6">
+    <div id="tabs-7">
       <div id="accordion">
         <h3>게임 모드(High, High/Low, Low)가 뭔가요?
         </h3>
@@ -1482,6 +1486,61 @@
         $(`#pending-sendDkey-tx`).html('(트랜잭션 실행 실패!)');
         $(`#pending-sendDkey-tx`).css('color', 'red');
       })
+    }
+
+    async function getRanking() {
+      
+      $("#spinner2").show()
+      var rankTable = `<table>
+                        <tr id="ranks-th">
+                          <td>순위</td>
+                          <td>주소</td>
+                          <td>수익</td>
+                          <td>베팅횟수</td>
+                          <td>베팅액</td>
+                          <td>승리액</td>
+                        </tr>
+                        <tr id="ranks-lastRow">
+                          <td colspan="6">
+                        </tr>`
+      $(`#ranks`).append($(rankTable));
+      $(`#ranks`).append($(`<div id="rankProcess"></div>`))
+
+      var gameInfo = await pollContract.methods.gameInfo().call()
+      var pollCount = parseInt(gameInfo.totalPollCount)
+      var rankData = {}
+      console.log(pollCount)
+      for(var i=0; i<pollCount; i++) {
+        $(`#rankProcess`).html(`Adding pollId: ${i} of total ${pollCount} polls...`)
+        var bets = await pollContract.methods.getBets(i).call()
+        for (var bet of bets) {
+          if (bet.isPaid) {
+            var bettor = rankData[bet.bettor] || {}
+            bettor.address = bet.bettor
+            bettor.betCount = (bettor.betCount || 0) + 1
+            bettor.betAmount = (bettor.betAmount || 0) + parseFloat(bet.betAmount)
+            bettor.paidAmount = (bettor.paidAmount || 0) + parseFloat(bet.paidAmount)
+            bettor.profit = bettor.paidAmount - bettor.betAmount
+            rankData[bet.bettor] = bettor
+          }
+        }
+      }
+      rankList = Object.values(rankData)
+      rankList.sort(function (a,b){return b.profit - a.profit})
+      for(let j=0; j<rankList.length; j++) {
+        var rank = rankList[j]
+        var trHtml = `  <tr>
+                          <td>${j+1}</td>
+                          <td>${getLink(rank.address)}</td>
+                          <td>${rank.profit}</td>
+                          <td>${rank.betCount}</td>
+                          <td>${rank.betAmount}</td>
+                          <td>${rank.paidAmount}</td>
+                        </tr>`
+        $(trHtml).insertBefore($("#ranks-lastRow"))
+      }
+      $(`#rankProcess`).html('')
+      $("#spinner2").hide();
     }
 
     function showEvent() {
