@@ -68,6 +68,7 @@
     span.gameMode { color: blue; font-weight: bold; }
     input.solid { border: solid 1px #9b4dca; }
     #btnConnect { margin-bottom: 0px; }
+    tr.myAddrRow { background-color: #cbcbf1}
     .min600 { display: none };    
 
     .topnav { overflow: hidden; background-color: #333;  position: relative; }
@@ -1532,7 +1533,9 @@
       rankList.sort(function (a,b){return b.profit - a.profit})
       for(let j=0; j<rankList.length; j++) {
         var rank = rankList[j]
-        var trHtml = `  <tr>
+        var cssClass=""
+        if (rank.address === myAddr) cssClass="myAddrRow"
+        var trHtml = `  <tr class="${cssClass}">
                           <td>${j+1}</td>
                           <td>${getLink(rank.address)}</td>
                           <td>${rank.profit}</td>
