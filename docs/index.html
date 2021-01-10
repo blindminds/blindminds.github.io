@@ -162,8 +162,8 @@
       <li><a href="#tabs-1">진행 중인 설문</a></li>
       <li onclick="getPastPolls()"><a href="#tabs-2">끝난 설문</a></li>
       <li><a href="#tabs-3" id="tab-3-menu">새 설문 만들기</a></li>
-      <li onclick="getRanking()"><a href="#tabs-4" id="tab-4-menu">랭킹</a></li>
-      <li onclick="getMyBets()"><a href="#tabs-5">내 기록</a></li>
+      <li><a href="#tabs-4" id="tab-4-menu">랭킹</a></li>
+      <li><a href="#tabs-5">내 기록</a></li>
       <li><a href="#tabs-6">DKEY 관리</a></li>
       <li><a href="#tabs-7">FAQ</a></li>
     </ul>
@@ -219,10 +219,11 @@
     
     </div>
     <div id="tabs-4" class="tab">
+      <button onclick="getRanking()" class="button" id="btnGetRanking">랭킹 순위 계신하기</button> 
       <div id="ranks"></div>
     </div>
     <div id="tabs-5">
-      <button onclick="getMyBets()" class="button" id="btnGetMyBets">나의 베팅 현황</button> 
+      <button onclick="getMyBets()" class="button" id="btnGetMyBets">나의 베팅 현황 불러오기</button> 
       <button onclick="getMyPolls()" class="button button-outline" id="btnGetMyPolls">내가 만든 설문 보기</button>
       <div id="myBets">
         <div>
@@ -1489,7 +1490,7 @@
     }
 
     async function getRanking() {
-      
+      $("#btnGetRanking").html('랭킹 순위 다시 불러오기')
       $("#spinner2").show()
       var rankTable = `<table>
                         <tr id="ranks-th">
