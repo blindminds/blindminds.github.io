@@ -1290,7 +1290,8 @@
       var betIndex = r.returnValues.index;
       var bet = await pollContract.methods.bets(pollId, betIndex).call();
       var paidAmount = parseFloat(bet.paidAmount);
-      var payRatio = parseInt(100*paidAmount / betAmount);
+      var profit = paidAmount - betAmount;
+      var payRatio = parseInt(100*profit / betAmount);
       var choiceDecoded = parseInt(bet.choiceDecoded);
       var choiceHash = bet.choiceHash;
       var pollState = '';
@@ -1388,7 +1389,7 @@
       } else {
         grandBonusAmount += betAmount;
       }
-      var grandRatio = parseInt(100 * grandPaidAmount / grandBetAmount);
+      var grandRatio = parseInt(100 * (grandPaidAmount-grandBetAmount) / grandBetAmount);
       $(`#myGrandBetCount`).html(grandBetCount);
       $(`#myGrandBetAmount`).html(grandBetAmount);
       $(`#myGrandPaidAmount`).html(grandPaidAmount);
@@ -1500,9 +1501,10 @@
                           <td>베팅횟수</td>
                           <td>베팅액</td>
                           <td>승리액</td>
+                          <td>수익률</td>
                         </tr>
                         <tr id="ranks-lastRow">
-                          <td colspan="6">
+                          <td colspan="7">
                         </tr>`
       $(`#ranks`).html("").append($(rankTable));
       $(`#ranks`).append($(`<div id="rankProcess"></div>`))
@@ -1537,6 +1539,7 @@
                           <td>${rank.betCount}</td>
                           <td>${rank.betAmount}</td>
                           <td>${rank.paidAmount}</td>
+                          <td>${parseInt(100*rank.profit/rank.betAmount)}%</td>
                         </tr>`
         $(trHtml).insertBefore($("#ranks-lastRow"))
       }
