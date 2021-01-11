@@ -905,8 +905,10 @@
       let input = $(`#betAmount-${pollId}`).val() || 0
       const betAmount = parseFloat(input)
       const choice = $(`input[name='choices-${pollId}']:checked`).val()
+      const betCount = parseInt($(`#pollBetCount-${pollId}`).html())
 
       var errorMsg = "";
+      if (betCount >= 100) errorMsg += "<li>설문당 최대 허용 베팅수인 100회를 초과했습니다.</li>"
       if (betAmount < 1) errorMsg += "<li>최소 베팅금액은 1 DKEY 입니다. </li>";
       if (betAmount > 1000) errorMsg += "<li>1회 최대 베팅금액은 1000 DKEY 입니다. </li>";
       if (betAmount > parseFloat(tokenAllowed)) { errorMsg += "<li>사용할 수 있도록 허용된 DKEY 수가 부족합니다. 허용액을 늘려주세요.</li>"}
